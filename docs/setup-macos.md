@@ -226,6 +226,12 @@ Stop any `digest cloud worker` you started by hand before starting the service, 
 - **History** shows a month calendar. Each day's dot shows its digest: sent (green), edited (violet) or draft (amber). Tap a day to open it, and swipe or use the arrows to change month.
 - **Your digest time.** Settings → Your digest time → **Send your digest by**. The draft is prepared two hours earlier, and **Remind me on this phone** sends a reminder an hour and a half before, Monday to Friday (a day you marked sent is skipped).
 - **Digest template.** Settings → Digest template: tap a section to edit its title and guidance, use its ⋯ menu to delete it (with Undo), or **Add section** at the end. New sections are written by the AI from your guidance.
+- **Notifications (the bell on Today).** Unread notices from your Mac. The newest also shows as a card on Today. Each one opens where you act on it:
+  - **Draft ready**: opens that day's draft.
+  - **AI stopped working / works again**: opens Settings, where the AI choice and each provider's state are.
+  - **Mac update available**: shows `digest update` to copy and run in Terminal.
+
+  **Mark all as read** clears the dot. Weekday "Time to send your digest" reminders and "a new app version is live" are ordinary Android notifications, not in the bell.
 - **Appearance.** Settings → Appearance: Dark (default), Light or System.
 
 ## Where data lives

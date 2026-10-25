@@ -115,6 +115,12 @@ class WorkRepository {
     await _source.update('notifications', {'read_at': _clock().toUtc().toIso8601String()}, where: [Filter.eq('id', notification.id)]);
   }
 
+  /// Marks every notification up to now as read (one request; row-level security keeps it to yours).
+  Future<void> markAllRead() async {
+    final now = _clock().toUtc().toIso8601String();
+    await _source.update('notifications', {'read_at': now}, where: [Filter.lte('created_at', now)]);
+  }
+
   Future<Snapshot<List<SessionSummary>>> sessions(String day) {
     return _cache.read<List<SessionSummary>>(
       userId: _uid,

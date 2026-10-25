@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -209,7 +210,20 @@ class _TodayBody extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Notifications', style: Theme.of(sheet).textTheme.titleLarge),
+              Row(
+                children: [
+                  Expanded(child: Text('Notifications', style: Theme.of(sheet).textTheme.titleLarge)),
+                  if (data.notifications.isNotEmpty)
+                    TextButton.icon(
+                      icon: const Icon(Icons.done_all_rounded),
+                      label: const Text('Mark all as read'),
+                      onPressed: () async {
+                        Navigator.of(sheet).pop();
+                        await ref.read(workRepositoryProvider).markAllRead();
+                      },
+                    ),
+                ],
+              ),
               const SizedBox(height: Space.m),
               if (data.notifications.isEmpty) const Text('Nothing new.'),
               for (final note in data.notifications) ...[
@@ -337,37 +351,127 @@ class _HeroChip extends StatelessWidget {
   }
 }
 
+/// Where tapping a notification takes you, by its kind.
+enum NotificationAction { draft, settings, macUpdate, today }
+
+NotificationAction notificationAction(AppNotification note) => switch (note.kind) {
+  'draft_ready' || 'nudge' => NotificationAction.draft,
+  'ai_unavailable' || 'ai_restored' => NotificationAction.settings,
+  'update_available' => NotificationAction.macUpdate,
+  _ => NotificationAction.today,
+};
+
+IconData _notificationIcon(AppNotification note) => switch (note.kind) {
+  'draft_ready' || 'nudge' => Icons.edit_note_rounded,
+  'ai_unavailable' => Icons.smart_toy_outlined,
+  'ai_restored' => Icons.check_circle_outline_rounded,
+  'update_available' => Icons.system_update_alt_rounded,
+  'mac_offline' => Icons.laptop_mac_rounded,
+  _ => Icons.notifications_active_rounded,
+};
+
 class _NotificationCard extends ConsumerWidget {
   const _NotificationCard({required this.note, this.onOpened});
 
   final AppNotification note;
   final VoidCallback? onOpened;
 
+  Future<void> _open(BuildContext context, WidgetRef ref) async {
+    onOpened?.call();
+    await ref.read(workRepositoryProvider).markRead(note);
+    if (!context.mounted) return;
+    switch (notificationAction(note)) {
+      case NotificationAction.draft:
+        final day = note.payload['work_date'];
+        context.go(day is String && day.isNotEmpty ? '/draft?day=$day' : '/draft');
+      case NotificationAction.settings:
+        // The AI choice lives in Settings, with each provider's state from your Mac.
+        context.go('/today/profile/settings');
+      case NotificationAction.macUpdate:
+        await showDialog<void>(context: context, builder: (_) => _MacUpdateDialog(note: note));
+      case NotificationAction.today:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    return GlassCard(
-      color: theme.colorScheme.primaryContainer,
-      onTap: () async {
-        onOpened?.call();
-        await ref.read(workRepositoryProvider).markRead(note);
-        if (context.mounted) context.go('/draft');
-      },
-      child: Row(
+    return Semantics(
+      container: true,
+      button: true,
+      label: '${note.title}. ${note.body}',
+      excludeSemantics: true,
+      child: GlassCard(
+        color: theme.colorScheme.primaryContainer,
+        onTap: () => _open(context, ref),
+        child: Row(
+          children: [
+            Icon(_notificationIcon(note), color: theme.colorScheme.onPrimaryContainer),
+            const SizedBox(width: Space.m),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(note.title, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.onPrimaryContainer)),
+                  Text(note.body, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "A new version for your Mac": the command to run, ready to copy.
+class _MacUpdateDialog extends StatelessWidget {
+  const _MacUpdateDialog({required this.note});
+
+  final AppNotification note;
+
+  static const command = 'digest update';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      icon: const Icon(Icons.system_update_alt_rounded),
+      title: Text(note.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.notifications_active_rounded, color: theme.colorScheme.onPrimaryContainer),
-          const SizedBox(width: Space.m),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(note.title, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.onPrimaryContainer)),
-                Text(note.body, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer)),
-              ],
+          const Text('On your Mac, open Terminal and run:'),
+          const SizedBox(height: Space.s),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: const BorderRadius.all(Radius.circular(Radii.highlight)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(Space.m, Space.xs, Space.xs, Space.xs),
+              child: Row(
+                children: [
+                  Expanded(child: SelectableText(command, style: theme.textTheme.bodyMedium?.copyWith(fontFamily: 'monospace'))),
+                  IconButton(
+                    tooltip: 'Copy the command',
+                    icon: const Icon(Icons.copy_rounded),
+                    onPressed: () async {
+                      await Clipboard.setData(const ClipboardData(text: command));
+                      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Command copied')));
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
+          const SizedBox(height: Space.s),
+          Text('It takes about a minute and restarts WorkDigest by itself.', style: theme.textTheme.bodySmall),
         ],
       ),
+      actions: [FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Done'))],
     );
   }
 }
