@@ -19,8 +19,9 @@ Future<void> main() async {
   }
   await Supabase.initialize(url: config.supabaseUrl, publishableKey: config.publishableKey);
   final prefs = await SharedPreferences.getInstance();
-  await initNotifications();
-  await scheduleUpdateChecks(config.siteUrl);
+  // Extras must never stop the app from opening: if one fails, the app still starts without it.
+  await _optional('notifications', initNotifications);
+  await _optional('update checks', () => scheduleUpdateChecks(config.siteUrl));
   runApp(
     ProviderScope(
       overrides: [
@@ -31,4 +32,12 @@ Future<void> main() async {
       child: const WorkDigestApp(),
     ),
   );
+}
+
+Future<void> _optional(String what, Future<void> Function() setUp) async {
+  try {
+    await setUp().timeout(const Duration(seconds: 5));
+  } on Object catch (error) {
+    debugPrint('WorkDigest started without $what: $error');
+  }
 }

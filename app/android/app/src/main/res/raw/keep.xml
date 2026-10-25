@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Release builds remove resources the code does not reference directly. The notification
+     icon is only named in Dart ('ic_stat_workdigest'), so keep it explicitly: without it the
+     app stops at startup. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_workdigest" />

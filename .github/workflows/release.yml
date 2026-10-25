@@ -106,6 +106,12 @@ jobs:
           apksigner="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort | tail -1)"
           certs="$("$apksigner" verify --print-certs WorkDigest.apk)"
           if grep -q "CN=Android Debug" <<<"$certs"; then echo "::error::The APK is signed with the debug key; check the keystore secrets"; exit 1; fi
+          # Resources named only in Dart are stripped from release builds unless kept
+          # (res/raw/keep.xml); a missing notification icon stops the app at startup.
+          aapt2="$(find "$ANDROID_HOME/build-tools" -name aapt2 -type f | sort | tail -1)"
+          if ! "$aapt2" dump resources WorkDigest.apk | grep -q "drawable/ic_stat_workdigest"; then
+            echo "::error::The notification icon was stripped from the APK; the app would not start"; exit 1
+          fi
           echo "sha256=$(sha256sum WorkDigest.apk | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           echo "size=$(stat -c %s WorkDigest.apk)" >> "$GITHUB_OUTPUT"
       - run: rm -f "$RUNNER_TEMP/release.keystore"
