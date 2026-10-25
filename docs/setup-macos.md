@@ -1,4 +1,37 @@
-# Setup on macOS (Phase 1: recorder)
+# Setup on macOS
+
+## For teammates: one command
+
+```sh
+curl -fsSL https://workdigest.vercel.app/install.sh | bash
+```
+
+It installs WorkDigest in your home folder (with [uv](https://docs.astral.sh/uv/); no admin password). Then it opens a setup page in your browser that only runs on your Mac (127.0.0.1). The page has ten steps, and each one checks that it worked:
+
+1. **Welcome**: what happens and what stays on the Mac.
+2. **Account**: your `@ei.study` email and a password, then the confirmation email.
+3. **You and your manager**: your name and git email (suggested from `git config`), your manager's first name, and the people you usually work with.
+4. **Your digest format**: upload a `.txt` or `.md` of past digests and replies, with `Me:` before each digest you sent and `Reply:` before each reply. You see the sections, greeting, header lines and sign-off learned from it before anything is saved. Your manager's open asks and rules are imported too.
+5. **Repositories**: pick a folder; the git repositories in it are found, and you tick the ones that count.
+6. **Jira and Bitbucket**: scoped, read-only tokens (the exact scopes are on the page and in section 6 below). They are stored in the Keychain only and tested at once.
+7. **AI for drafts**: Cursor and Claude Code are each tried with a tiny prompt. Choose a working one, or "Facts only". If one says *signed out*, run its login command in Terminal (`cursor-agent login`, or `claude` then `/login`) and press *Check again*.
+8. **Agent capture**: installs the Claude Code and Cursor hooks you agree to. Each settings file is backed up first.
+9. **Start**: turns on the background service and waits for this Mac's first heartbeat.
+10. **Phone**: a QR code for the Android app. Sign in with the same email and password.
+
+| Command | What |
+|---|---|
+| `digest setup` | Opens the page again to change anything; steps you already did are remembered. |
+| `digest update` | Installs the newest release and restarts the service. The Mac and the app tell you when there is one. |
+| `digest uninstall` | Removes the service, the hooks and the Keychain items. It asks before deleting your data. Then run `uv tool uninstall workdigest`. |
+
+> **Keychain prompt.** If macOS asks whether "python3.12" may use confidential information stored in "WorkDigest", and *you* just installed or updated WorkDigest, choose **Always Allow**. Keychain items belong to the program that created them, so a newly installed copy asks once. If you didn't expect it, choose **Deny**.
+
+The rest of this page is the **developer setup from source**, as used to build WorkDigest. It is not needed after the one-line install.
+
+---
+
+# Developer setup from source
 
 Tested on macOS 26.6 (Apple silicon), Python 3.14, uv 0.10, Claude Code 2.1.x and Cursor 3.24.
 
@@ -109,7 +142,7 @@ digest atlassian sync --date 2026-10-26
 The schema lives in `supabase/migrations/`. It's applied with `supabase db push --linked`, and its tests run with `make db-test`. Every table has row-level security, so you only ever see your own rows. The Mac uses only the public publishable key plus your own sign-in; the service-role key is never used.
 
 ```sh
-digest cloud setup your-project-ref       # project URL + publishable key into config.toml
+digest cloud setup your-project-ref       # project URL + publishable key into config.toml (the wizard does this for teammates)
 digest cloud signup --email arjun.k@ei.study # one-time; confirm the email Supabase sends
 digest cloud login                            # refresh token goes to the Keychain
 digest cloud push --dry-run                   # exactly what would be uploaded
@@ -131,7 +164,7 @@ flutter run -d chrome \
   --dart-define=SUPABASE_PUBLISHABLE_KEY=$KEY
 ```
 
-Sign in with the same account as `digest cloud login`. The background daemon (section 9) does the work the app requests: drafts, regenerating a section, reading a reply.
+Sign in with the same account as `digest cloud login`. The background daemon (section 9) does the work the app requests: drafts, regenerating a section, reading a reply. Add `--dart-define=SITE_URL=https://workdigest.vercel.app` to try the update checker; release builds get all three values from the release workflow.
 
 | Platform | Status on this Mac |
 |---|---|
@@ -198,4 +231,4 @@ All data lives under `~/Library/Application Support/WorkDigest/`, owner-only (07
 - `config.toml`.
 - `logs/`: daemon and launchd logs.
 
-Nothing leaves the Mac in Phase 1.
+Redacted summaries, drafts, asks and rules are synced to your own Supabase account (row-level security), and the AI you choose receives the redacted evidence when drafting. Raw prompts, code and tool output never leave the Mac.

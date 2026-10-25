@@ -53,7 +53,7 @@ This page is kept honest. Each item says what is affected and what the system do
 | Polling, not Realtime | The worker polls every 30 s. | Realtime subscriptions can replace polling later; the job claim is already atomic. |
 | Push notifications | The 20:00 nudge is written to the `notifications` table. A phone push (FCM/APNs) arrives with the app (Phase 5–6). | The app shows unread notifications when opened. |
 | Conflicts | Asks, reply items and digests edited in the app win, because the Mac applies them on pull. Other tables are Mac-authoritative. | `updated_by` records who changed a row last. |
-| CI | The pgTAP step needs Docker in Bitbucket Pipelines (`services: [docker]`). The Python cloud integration tests are skipped when no local stack runs. | Run `make check` and `make db-test` on the Mac before pushing. |
+| CI | GitHub Actions starts a local Supabase stack for the pgTAP and cloud integration tests. Locally, the cloud tests are skipped when no stack runs. | Run `make db-test` with `supabase start` before changing migrations. |
 | Database password | It appeared in this session's transcript when `creds.txt` was read. | Reset it in Supabase, then run `digest secrets set supabase-db`. |
 
 ## Flutter app (Phase 5)
@@ -89,6 +89,21 @@ This page is kept honest. Each item says what is affected and what the system do
 | My rules | Exclusions cover PRs (by number, repo or age), tickets and repos. Everything else is an instruction the AI follows on a best-effort basis; it is not checked in code. | The app labels instruction-only rules. Confirm shows exactly what will be enforced. |
 | My rules, reading | Reading a rule needs the Mac. Without an LLM, only patterns are recognised: PR numbers and ranges, "older than N days, weeks or months", ticket keys, and repo names from your config. | The rule waits as "reading" until the Mac is online. Reword it if the chips are wrong. |
 | Glass | Blur is skipped under reduced motion or high contrast, and the background is static, to save battery. | Surfaces render solid with the same contrast. |
+
+## Team rollout (v0.1)
+
+| Area | Limitation | Mitigation |
+|---|---|---|
+| Platforms | The recorder needs macOS, and the app is Android only. | The website says so; iOS needs Xcode and a share extension. |
+| Real sign-up | Verified with the database's domain trigger and the wizard's API against fakes. The first real teammate sign-up (email confirmation through Supabase's mailer) is the remaining live check. | The wizard's "I've confirmed my email" step retries the sign-in; errors say what to do. |
+| Supabase email | The built-in mailer has low rate limits (a few emails per hour). | Fine for a team rollout; configure a custom SMTP sender in Supabase for more. |
+| Format learning | Learned without an LLM, from the latest digest's numbered sections. Unusual layouts (no numbers, several digests without `Me:` markers) are not recognised. | The preview shows what was learned before saving. The error explains the expected format. |
+| Custom sections | Written by the LLM from a style example. With "Facts only" they stay as placeholders to fill in. | Built-in sections keep their code-written facts. |
+| Keychain after updates | Keychain items belong to the Python that created them. A new Python (a uv upgrade, or moving from a source checkout to the installed tool) asks once. | Choose **Always Allow** when you just installed or updated WorkDigest. |
+| Update installs | Android always asks the user to confirm an install, and asks once to allow installs from WorkDigest. | The update sheet says so. The SHA-256 is checked before Android sees the file. |
+| Background checks | WorkManager runs at most every ~6 hours and may be delayed by battery savers. | The app also checks on every open and resume. |
+| APK size | About 58 MB: one APK for all processor types, so one download link works for everyone. | Split per processor type later if size matters. |
+| Contributors widget | GitHub's repository sidebar is cached and can lag behind a rewritten history. | The contributors API is the source of truth. |
 
 ## Later phases (to verify before implementing)
 - **LLM through `cursor-agent -p`.** Generation needs the Mac awake and online. The CLI is a scripting tool, not an API with an SLA. In 3 live runs (11 calls: 8 session summaries and 3 drafts), none failed. Retries after invalid JSON are not logged yet, so first-attempt reliability is unmeasured.
