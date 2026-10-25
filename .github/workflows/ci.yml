@@ -17,7 +17,7 @@ concurrency:
 jobs:
   recorder:
     name: Recorder (lint, types, tests, coverage, catalog, public-data scan)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
@@ -28,7 +28,7 @@ jobs:
 
   database:
     name: Database (migrations, RLS, pgTAP) and cloud integration tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: supabase/setup-cli@v1
@@ -58,7 +58,7 @@ jobs:
 
   web:
     name: Website and setup wizard (build, unit, Playwright, axe, tokens)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -82,7 +82,7 @@ jobs:
 
   secrets:
     name: Secret scan (gitleaks)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
         with:

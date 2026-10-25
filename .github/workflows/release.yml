@@ -33,7 +33,7 @@ concurrency:
 jobs:
   validate:
     name: Check the request
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       tag: v${{ inputs.version }}
       build: ${{ steps.build.outputs.number }}
@@ -61,7 +61,7 @@ jobs:
   android:
     name: Signed Android app
     needs: [validate, checks]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       sha256: ${{ steps.apk.outputs.sha256 }}
       size: ${{ steps.apk.outputs.size }}
@@ -118,7 +118,7 @@ jobs:
   mac:
     name: Mac package (with the setup wizard)
     needs: [validate, checks]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -158,7 +158,7 @@ jobs:
   publish:
     name: GitHub Release, version.json and the website
     needs: [validate, android, mac]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: production
       url: ${{ vars.SITE_URL }}
