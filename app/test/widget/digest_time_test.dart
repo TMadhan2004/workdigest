@@ -28,7 +28,8 @@ void main() {
     // Then: Fri 19:30 and the next weekdays are scheduled in the account's time zone; after
     //       marking sent, Friday's reminder is gone and Monday 19:30 comes first.
     final reminders = FakeReminderPlugin();
-    final app = await pumpApp(tester, reminders: reminders);
+    // An exact moment (18:00 in Kolkata), so the result is the same in every machine's time zone.
+    final app = await pumpApp(tester, reminders: reminders, now: DateTime.utc(2026, 10, 23, 12, 30));
     await tester.pumpAndSettle();
     expect(reminders.sorted.first.at, DateTime(2026, 10, 23, 19, 30));
     expect(reminders.zones.toSet(), {'Asia/Kolkata'});
