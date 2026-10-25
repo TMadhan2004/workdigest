@@ -2,7 +2,7 @@
 -- Each test id matches the catalog convention (TC-DB-NNN).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(36);
+select plan(39);
 
 -- The test users live at example.test; allow that domain inside this test transaction only.
 insert into public.allowed_signup_domains (domain) values ('example.test');
@@ -212,6 +212,20 @@ select throws_ok($$select * from public.allowed_signup_domains$$, '42501', null,
 insert into public.settings (manager_name, display_name) values ('Priya', 'Arjun K')
   on conflict (user_id) do update set manager_name = excluded.manager_name, display_name = excluded.display_name;
 select is((select manager_name from public.settings), 'Priya', 'TC-DB-036: each user stores their own manager name');
+reset role;
+
+-- TC-DB-037..039: single test addresses can be allowed without opening their whole domain.
+insert into public.allowed_signup_emails (email, note) values ('tester@example.org', 'trial');
+select lives_ok(
+  $$insert into auth.users (id, email, aud, role) values ('66666666-6666-6666-6666-666666666666', 'Tester@Example.org', 'authenticated', 'authenticated')$$,
+  'TC-DB-037: an allow-listed address can sign up (any letter case)'
+);
+select throws_ok(
+  $$insert into auth.users (id, email, aud, role) values ('77777777-7777-7777-7777-777777777777', 'other@example.org', 'authenticated', 'authenticated')$$,
+  '42501', null, 'TC-DB-038: another address on that domain still cannot'
+);
+select pg_temp.act_as('11111111-1111-1111-1111-111111111111');
+select throws_ok($$select * from public.allowed_signup_emails$$, '42501', null, 'TC-DB-039: the address list is not visible to app users');
 reset role;
 
 select * from finish();
