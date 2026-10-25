@@ -20,6 +20,14 @@ const DESCRIPTIONS: Record<Screen, string> = {
     <div class="phone">
       <div class="phone-screen">
         <span class="phone-camera" aria-hidden="true"></span>
+        <div class="phone-status" aria-hidden="true">
+          <span>18:00</span>
+          <span class="phone-status-icons">
+            <svg viewBox="0 0 16 12"><path d="M1 11h2V8H1zm4 0h2V6H5zm4 0h2V3H9zm4 0h2V0h-2z" /></svg>
+            <svg viewBox="0 0 16 12"><path d="M8 11.5 15.5 3A11.5 11.5 0 0 0 .5 3z" /></svg>
+            <svg viewBox="0 0 10 16"><path d="M3 0h4v1.5h2.5V16H.5V1.5H3z" /></svg>
+          </span>
+        </div>
         <img [src]="src()" [alt]="description()" width="412" height="915" decoding="async"
              [attr.loading]="eager() ? 'eager' : 'lazy'" [attr.fetchpriority]="eager() ? 'high' : null" />
       </div>

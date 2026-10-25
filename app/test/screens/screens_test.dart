@@ -14,6 +14,10 @@ import '../fakes/fakes.dart';
 /// ```
 const _enabled = bool.fromEnvironment('SCREENS');
 
+/// Logical pixels of a Pixel 9's status bar and gesture bar.
+const double _statusBar = 40;
+const double _gestureBar = 16;
+
 Future<void> _loadFont(String family, List<String> files) async {
   final loader = FontLoader(family);
   for (final file in files) {
@@ -43,6 +47,11 @@ void main() {
       // Given: the demo data, dark theme and the app's real fonts.
       // When: the screen opens and its animations finish.
       // Then: it is saved as build/screens/<name>.png for `make screens` (skipped in normal runs).
+      // Like a Pixel: a status bar (with the camera) above the app and the gesture bar below,
+      // so the app lays itself out inside them exactly as on a phone.
+      tester.view
+        ..padding = const FakeViewPadding(top: _statusBar * 2, bottom: _gestureBar * 2)
+        ..viewPadding = const FakeViewPadding(top: _statusBar * 2, bottom: _gestureBar * 2);
       await pumpApp(tester, location: location, brightness: Brightness.dark);
       await tester.pump(const Duration(seconds: 2));
       await expectLater(find.byType(MaterialApp), matchesGoldenFile('../../build/screens/$name.png'));

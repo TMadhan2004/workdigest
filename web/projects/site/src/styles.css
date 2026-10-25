@@ -41,7 +41,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 88px; }
 .phone { position: relative; width: min(300px, 78vw); padding: 10px; border-radius: 42px; background: linear-gradient(160deg, #2c2933, #141218 60%, #1d1b22); box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.10), inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 40px 90px rgba(0, 0, 0, 0.45); }
 .phone-screen { position: relative; aspect-ratio: 412 / 915; border-radius: 32px; overflow: hidden; background: #0e0d12; }
 .phone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.phone-camera { position: absolute; z-index: 2; top: 10px; left: 50%; width: 13px; height: 13px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 35% 35%, #2b2f3a 0 25%, #050507 55%); box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.55); }
+.phone-camera { position: absolute; z-index: 2; top: calc(100% * 20 / 915 - 6.5px); left: 50%; width: 13px; height: 13px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 35% 35%, #2b2f3a 0 25%, #050507 55%); box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.55); }
+
+/* A Pixel status bar in the 40 dp the app leaves free at the top (the screens are 412 × 915 dp). */
+.phone-status { position: absolute; z-index: 1; inset: 0 0 auto; height: calc(100% * 40 / 915); display: flex; align-items: center; justify-content: space-between; padding: 0 8%; color: rgba(255, 255, 255, 0.88); font: 600 9.5px/1 var(--wd-font); letter-spacing: 0.02em; }
+.phone-status-icons { display: flex; gap: 4px; align-items: center; }
+.phone-status-icons svg { height: 8px; width: auto; fill: currentColor; }
 
 /* Sections */
 .section { padding: 110px 0; }
