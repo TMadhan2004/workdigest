@@ -9,6 +9,7 @@ import 'package:work_tracker/core/motion/motion.dart';
 import 'package:work_tracker/core/theme/app_theme.dart';
 import 'package:work_tracker/core/widgets/aurora.dart';
 import 'package:work_tracker/data/providers.dart';
+import 'package:work_tracker/features/reminders/reminders.dart';
 import 'package:work_tracker/features/update/update_schedule.dart';
 
 /// One tab of the floating navigation bar.
@@ -56,7 +57,8 @@ class AppShell extends StatelessWidget {
 }
 
 /// The first time the app opens signed in, Android 13+ asks whether WorkDigest may notify
-/// ("Draft ready", "a new version is live"). Asked once; the answer is Android's to keep.
+/// ("Send your digest", "a new version is live"). Asked once; the answer is Android's to keep.
+/// It also keeps the weekday send reminders scheduled while the app is in use.
 class _AskForNotificationsOnce extends ConsumerStatefulWidget {
   const _AskForNotificationsOnce({required this.child});
 
@@ -79,7 +81,10 @@ class _AskForNotificationsOnceState extends ConsumerState<_AskForNotificationsOn
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    ref.watch(reminderSyncProvider); // weekday "send your digest" reminders stay scheduled
+    return widget.child;
+  }
 }
 
 /// Switches tabs with depth: the new tab drifts in from the side it lives on and settles,

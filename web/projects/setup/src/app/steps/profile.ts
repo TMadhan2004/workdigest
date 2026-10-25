@@ -3,6 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { Api } from '../api';
 import { Action, Wizard } from '../wizard';
 
+/** "18:00" → "16:00": the draft is prepared two hours before the send time (never before 00:00). */
+export function draftTimeFor(sendBy: string): string {
+  const [hours, minutes] = sendBy.split(':').map(Number);
+  const total = Math.max(0, (hours || 0) * 60 + (minutes || 0) - 120);
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+
 export function splitList(value: string): string[] {
   return value
     .split(/[,\n]/)
@@ -32,6 +39,12 @@ export function splitList(value: string): string[] {
         <span class="hint">The digest opens with "Greetings {{ manager || 'Name' }},". The app shows "{{ manager || 'Name' }}'s rules".</span>
       </div>
       <div class="field">
+        <label for="sendby">When do you usually send your digest?</label>
+        <input id="sendby" name="sendby" type="time" required [(ngModel)]="sendBy" />
+        <span class="hint">Your draft is prepared two hours earlier ({{ draftAt() }}), and your phone reminds you
+          an hour and a half before, Monday to Friday. You can change it later in the app.</span>
+      </div>
+      <div class="field">
         <label for="team">People you usually work with (optional)</label>
         <input id="team" name="team" type="text" [(ngModel)]="team" />
         <span class="hint">Shown as "Team members" in the digest header. You can change it each day.</span>
@@ -52,6 +65,12 @@ export class ProfileStep implements OnInit {
   protected emails = '';
   protected manager = '';
   protected team = '';
+  protected sendBy = '19:00';
+
+  /** Two hours before the send time, as the Mac and the app use it. */
+  protected draftAt(): string {
+    return draftTimeFor(this.sendBy);
+  }
 
   ngOnInit(): void {
     const profile = this.wizard.state()?.profile;
@@ -60,6 +79,7 @@ export class ProfileStep implements OnInit {
     this.emails = profile.emails.join(', ');
     this.manager = profile.manager_name;
     this.team = profile.team_members.join(', ');
+    this.sendBy = profile.send_by || '19:00';
   }
 
   protected async save(): Promise<void> {
@@ -69,6 +89,7 @@ export class ProfileStep implements OnInit {
         emails: splitList(this.emails),
         manager_name: this.manager,
         team_members: splitList(this.team),
+        send_by: this.sendBy,
       }),
     );
     if (saved) await this.wizard.next();

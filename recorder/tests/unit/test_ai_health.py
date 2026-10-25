@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 
 from tests.cloud.fake_tables import FakeTables
 from tests.conftest import IST
@@ -225,3 +226,29 @@ def test_mac_update_is_announced_once(paths: Paths, config: Config, store: Store
     assert [t for t, _ in notes.sent] == ["WorkDigest 9.9.0 for your Mac"]
     assert "digest update" in notes.sent[0][1]
     assert [n["kind"] for n in tables.rows["notifications"]] == ["update_available"]
+
+
+def test_app_times_win_and_time_zone(tmp_path: Path) -> None:
+    """TC-AIH-010: Times changed in the app apply on the Mac, and the Mac reports its time zone.
+
+    Given: config.toml with send by 21:00 and the app's settings with 18:00:00 / 16:00:00.
+    When: the config is loaded, and /etc/localtime points into zoneinfo or nowhere useful.
+    Then: send_deadline 18:00 and nudge_time 16:00; the zone is "Asia/Kolkata", else None.
+    """
+    from workdigest.cloud.sync import mac_timezone
+    from workdigest.config import load_config
+
+    (tmp_path / "config.toml").write_text(
+        '[digest]\nsend_deadline = "21:00"\nnudge_time = "20:00"\n'
+    )
+    (tmp_path / "cloud_settings.json").write_text(
+        '{"send_deadline": "18:00:00", "nudge_time": "16:00:00", "provider": null}'
+    )
+    digest = load_config(tmp_path / "config.toml").digest
+    assert (digest.send_deadline, digest.nudge_time) == ("18:00", "16:00")
+    zones = tmp_path / "usr/share/zoneinfo/Asia"
+    zones.mkdir(parents=True)
+    (zones / "Kolkata").write_text("")
+    (tmp_path / "localtime").symlink_to(zones / "Kolkata")
+    assert mac_timezone(tmp_path / "localtime") == "Asia/Kolkata"
+    assert mac_timezone(tmp_path / "missing") is None

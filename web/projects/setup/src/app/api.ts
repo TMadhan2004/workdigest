@@ -4,7 +4,14 @@ import { Injectable, signal } from '@angular/core';
 export interface SetupState {
   team: { domain: string; site_url: string; apk_url: string };
   account: { email: string; signed_in: boolean };
-  profile: { name: string; emails: string[]; manager_name: string; team_members: string[] };
+  profile: {
+    name: string;
+    emails: string[];
+    manager_name: string;
+    team_members: string[];
+    send_by: string;
+    draft_at: string;
+  };
   conversation: { learned: boolean };
   repos: string[];
   atlassian: {

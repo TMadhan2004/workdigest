@@ -88,6 +88,9 @@ void main() {
         ]);
       await pumpApp(tester, cloud: cloud, location: '/today/profile/settings');
       await tester.scrollUntilVisible(find.text('UI tweaks · 2026-10-23'), 300, scrollable: find.byType(Scrollable).first);
+      // Bring it above the floating navigation bar before tapping.
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -250));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Restore'));
       await tester.pumpAndSettle();
       expect(cloud.tables['hidden_sessions'], isEmpty);

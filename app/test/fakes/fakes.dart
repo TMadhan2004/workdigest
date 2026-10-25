@@ -12,6 +12,7 @@ import 'package:work_tracker/data/models/json.dart';
 import 'package:work_tracker/data/providers.dart';
 import 'package:work_tracker/data/sources/cloud_source.dart';
 import 'package:work_tracker/data/sources/snapshot_cache.dart';
+import 'package:work_tracker/features/reminders/reminders.dart';
 import 'package:work_tracker/features/share/share_intake.dart';
 import 'package:work_tracker/features/share/share_service.dart';
 
@@ -305,6 +306,23 @@ FakeCloudSource seededCloud({DateTime? now}) {
   return cloud;
 }
 
+/// Records the reminders the app would schedule instead of calling Android.
+class FakeReminderPlugin implements ReminderPlugin {
+  final Map<int, Reminder> scheduled = {};
+  final List<String> zones = [];
+
+  @override
+  Future<void> cancel(int id) async => scheduled.remove(id);
+
+  @override
+  Future<void> schedule(int id, Reminder reminder, String timezone) async {
+    scheduled[id] = reminder;
+    zones.add(timezone);
+  }
+
+  List<Reminder> get sorted => scheduled.values.toList()..sort((a, b) => a.at.compareTo(b.at));
+}
+
 /// Pumps the whole app (router, theme, providers) on top of fakes and returns the fakes.
 Future<({FakeCloudSource cloud, FakeShareService share, ProviderContainer container})> pumpApp(
   WidgetTester tester, {
@@ -316,9 +334,11 @@ Future<({FakeCloudSource cloud, FakeShareService share, ProviderContainer contai
   Brightness brightness = Brightness.light,
   bool disableAnimations = false,
   List<Override> overrides = const [],
+  FakeReminderPlugin? reminders,
 }) async {
   // "system" so each test's platform brightness picks the light or dark theme.
-  SharedPreferences.setMockInitialValues({'theme_mode': 'system'});
+  // "asked_notifications": on a device, Android's permission dialog would pause the app mid-test.
+  SharedPreferences.setMockInitialValues({'theme_mode': 'system', 'asked_notifications': true});
   final prefs = await SharedPreferences.getInstance();
   final at = now ?? fixedNow;
   final source = cloud ?? seededCloud(now: at);
@@ -346,6 +366,7 @@ Future<({FakeCloudSource cloud, FakeShareService share, ProviderContainer contai
       // No timers in widget tests: changes refresh at once, and "now" is pinned.
       liveDebounceProvider.overrideWithValue(Duration.zero),
       nowTickProvider.overrideWith((ref) => Stream.value(at)),
+      reminderPluginProvider.overrideWithValue(reminders ?? FakeReminderPlugin()),
       ...overrides,
     ],
   );

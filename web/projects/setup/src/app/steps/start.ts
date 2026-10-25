@@ -10,7 +10,7 @@ export const POLL_LIMIT = 40;
   template: `
     <h2>Start WorkDigest</h2>
     <p class="muted">WorkDigest runs quietly in the background and starts again after every login. It collects the
-      day's evidence, keeps your phone in sync and drafts your digest in the evening.</p>
+      day's evidence, keeps your phone in sync and drafts your digest before the time you send it.</p>
     <div class="glass card">
       <ol class="progress">
         <li [class.done]="started()">Start the background service</li>

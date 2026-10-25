@@ -1,6 +1,6 @@
 import { ApiError, takeToken } from './api';
 import { qrDataUrl } from './steps/phone';
-import { splitList } from './steps/profile';
+import { draftTimeFor, splitList } from './steps/profile';
 import { Action } from './wizard';
 
 describe('setup helpers', () => {
@@ -15,6 +15,12 @@ describe('setup helpers', () => {
 
   it('splits lists typed with commas or new lines', () => {
     expect(splitList(' a@x.io, b@x.io\nc@x.io ,, ')).toEqual(['a@x.io', 'b@x.io', 'c@x.io']);
+  });
+
+  it('prepares the draft two hours before the send time', () => {
+    expect(draftTimeFor('18:00')).toBe('16:00');
+    expect(draftTimeFor('19:45')).toBe('17:45');
+    expect(draftTimeFor('01:00')).toBe('00:00');
   });
 
   it('draws a QR code as an image', () => {

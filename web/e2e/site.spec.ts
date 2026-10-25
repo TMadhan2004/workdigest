@@ -73,7 +73,19 @@ test('the story phone follows the step you are reading', async ({ page, isMobile
     const step = document.querySelectorAll('.story-step')[2] as HTMLElement;
     window.scrollTo(0, step.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2 + step.offsetHeight / 2);
   });
-  await expect(page.locator('.story-sticky .phone')).toHaveAttribute('aria-label', /draft digest/);
+  await expect(page.locator('.story-sticky .story-frame.on img')).toHaveAttribute('alt', /Today screen/);
+});
+
+test('the phones show real screens of the app', async ({ page, request }) => {
+  await page.goto('/');
+  const hero = page.locator('.hero-phone img');
+  await expect(hero).toHaveAttribute('src', '/screens/today.webp');
+  for (const name of ['today', 'timeline', 'draft', 'asks', 'history']) {
+    const image = await request.get(`/screens/${name}.webp`);
+    expect(image.ok(), name).toBeTruthy();
+    expect(image.headers()['content-type']).toContain('image/webp');
+  }
+  expect(await page.evaluate(() => document.body.innerText)).not.toMatch(/\b8 ?pm\b|\b9 ?pm\b/i);
 });
 
 test('with reduced motion the diagram is fully lit and nothing waits to appear', async ({ page }) => {

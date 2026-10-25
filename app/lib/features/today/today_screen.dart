@@ -249,29 +249,31 @@ class _TodayBody extends ConsumerWidget {
   }
 }
 
-/// The day's headline: gap count, status and the send deadline, on the violet hero card.
-class _DraftHero extends StatelessWidget {
+/// The day's headline: gap count, status and your send-by time, on the violet hero card.
+class _DraftHero extends ConsumerWidget {
   const _DraftHero({required this.digest, required this.now});
 
   final Digest? digest;
   final DateTime now;
 
-  static const int _deadlineHour = 21;
-
-  String _countdown() {
-    final deadline = DateTime(now.year, now.month, now.day, _deadlineHour);
+  String _countdown(String sendBy) {
+    final parts = sendBy.split(':');
+    final deadline = DateTime(now.year, now.month, now.day, int.tryParse(parts.first) ?? 21, parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0);
     final left = deadline.difference(now);
-    if (left.isNegative) return 'past 21:00';
+    if (left.isNegative) return 'past $sendBy';
     final hours = left.inHours;
     final minutes = left.inMinutes % 60;
     return hours > 0 ? '${hours}h ${minutes}m left' : '${minutes}m left';
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final aurora = context.aurora;
     final theme = Theme.of(context);
     final digest = this.digest;
+    final settings = ref.watch(profileProvider).valueOrNull;
+    final sendBy = settings?.sendDeadline ?? '21:00';
+    final draftAt = settings?.nudgeTime ?? '20:00';
     final muted = theme.textTheme.bodyMedium?.copyWith(color: aurora.onHeroMuted);
     return HeroCard(
       onTap: () => context.go('/draft'),
@@ -288,7 +290,7 @@ class _DraftHero extends StatelessWidget {
           ),
           const SizedBox(height: Space.l),
           if (digest == null)
-            Text('No draft yet. Close the day to generate one, or wait for the 8 pm draft.', style: theme.textTheme.titleMedium?.copyWith(color: aurora.onHero))
+            Text('No draft yet. Close the day to generate one, or wait for the $draftAt draft.', style: theme.textTheme.titleMedium?.copyWith(color: aurora.onHero))
           else ...[
             Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -307,7 +309,7 @@ class _DraftHero extends StatelessWidget {
             children: [
               Icon(Icons.schedule_rounded, size: 18, color: aurora.onHeroMuted),
               const SizedBox(width: Space.xs),
-              Expanded(child: Text('Send before 21:00 · ${_countdown()}', style: muted)),
+              Expanded(child: Text('Send by $sendBy · ${_countdown(sendBy)}', style: muted)),
               Text('Open', style: theme.textTheme.labelLarge?.copyWith(color: aurora.onHero)),
               Icon(Icons.arrow_forward_rounded, size: 18, color: aurora.onHero),
             ],

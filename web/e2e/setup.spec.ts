@@ -6,7 +6,7 @@ test.use({ baseURL: 'http://127.0.0.1:4310' });
 const STATE = {
   team: { domain: 'ei.study', site_url: 'https://workdigest.example', apk_url: 'https://workdigest.example/download/android' },
   account: { email: '', signed_in: false },
-  profile: { name: 'Arjun K', emails: ['arjun.k@ei.study'], manager_name: '', team_members: [] },
+  profile: { name: 'Arjun K', emails: ['arjun.k@ei.study'], manager_name: '', team_members: [], send_by: '19:00', draft_at: '17:00' },
   conversation: { learned: false },
   repos: [],
   atlassian: { email: 'arjun.k@ei.study', jira_token: false, bitbucket_token: false, jira_site: 'https://ei-study.atlassian.net', bitbucket_workspace: 'ei-india-admin' },
@@ -101,9 +101,11 @@ test('a new teammate goes through every step', async ({ page }) => {
   // Profile: git details are suggested.
   await expect(page.getByLabel('Your name')).toHaveValue('Arjun K');
   await page.getByLabel("Your manager's first name").fill('Sana');
+  await page.getByLabel('When do you usually send your digest?').fill('18:00');
+  await expect(page.getByText('prepared two hours earlier (16:00)')).toBeVisible();
   await checkA11y(page);
   await page.getByRole('main').getByRole('button', { name: 'Save and continue' }).click();
-  expect(sent['profile']).toMatchObject({ emails: ['arjun.k@ei.study'], manager_name: 'Sana' });
+  expect(sent['profile']).toMatchObject({ emails: ['arjun.k@ei.study'], manager_name: 'Sana', send_by: '18:00' });
 
   // Conversation file.
   await page.locator('input[type=file]').setInputFiles({ name: 'chat.txt', mimeType: 'text/plain', buffer: Buffer.from('Me:\nHi Sana,\n') });

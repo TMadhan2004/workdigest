@@ -501,7 +501,7 @@ TEMPLATE_FILE = "template.json"
 
 
 def _pull_settings(tables: Tables, home: Path) -> tuple[bool, bool]:
-    """Write the app's provider/transmit choices and active template where the Mac reads them."""
+    """Write the app's provider, transmit and time choices and the active template where the Mac reads them."""
     wrote_settings = wrote_template = False
     rows = tables.select("settings", {"limit": "1"})
     if rows:
@@ -509,6 +509,8 @@ def _pull_settings(tables: Tables, home: Path) -> tuple[bool, bool]:
         overrides = {
             "provider": settings.get("provider"),
             "transmit": settings.get("transmit") or {},
+            "nudge_time": settings.get("nudge_time"),
+            "send_deadline": settings.get("send_deadline"),
         }
         (home / SETTINGS_FILE).write_text(json.dumps(overrides, indent=2), encoding="utf-8")
         wrote_settings = True
@@ -614,6 +616,8 @@ def push_profile(
     }
     if capabilities is not None:
         row["capabilities"] = capabilities
+    elif zone := mac_timezone():
+        row["timezone"] = zone  # the 20:00-style schedules and phone reminders use local time
     key = "profile_hash" if capabilities is None else "profile_caps_hash"
     digest = stable_hash(canonical_json(row))
     if store.scalar("SELECT value FROM cloud_meta WHERE key = ?", (key,)) == digest:
@@ -624,6 +628,16 @@ def push_profile(
         (key, digest),
     )
     return True
+
+
+def mac_timezone(localtime: Path = Path("/etc/localtime")) -> str | None:
+    """This Mac's IANA time zone ("Asia/Kolkata"), from the /etc/localtime link."""
+    try:
+        target = str(localtime.resolve())
+    except OSError:
+        return None
+    _, marker, zone = target.partition("zoneinfo/")
+    return zone if marker and zone else None
 
 
 def post_notification(tables: Tables, kind: str, title: str, body: str) -> None:

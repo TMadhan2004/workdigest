@@ -12,8 +12,8 @@ import { Releases } from '../shared';
         <h1 id="hero-title" class="rise rise-2">Your daily digest,<br /><span class="gradient-text">drafted from evidence.</span></h1>
         <p class="lead rise rise-3">
           WorkDigest quietly notes what you did on your Mac today, from AI agent sessions and commits to tests, Jira
-          and pull requests. In the evening it drafts your digest in your manager's format. You review it on your
-          phone and send it yourself.
+          and pull requests. Before the time you send it, it drafts your digest in your manager's format. You
+          review it on your phone and send it yourself.
         </p>
         <div class="btn-row rise rise-4">
           <a class="btn btn-primary" href="#get-started">Get started</a>
@@ -26,7 +26,7 @@ import { Releases } from '../shared';
       </div>
       <div class="hero-phone rise rise-3">
         <div class="phone-glow" aria-hidden="true"></div>
-        <wd-phone screen="today" />
+        <wd-phone screen="today" [eager]="true" />
       </div>
     </section>
   `,

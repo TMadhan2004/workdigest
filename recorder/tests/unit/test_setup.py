@@ -400,3 +400,43 @@ def test_update_reads_the_latest_release() -> None:
 
     assert latest_release("https://wd.example/", opener)["mac"]["wheel_url"] == "https://x/w.whl"
     assert urls == ["https://wd.example/version.json"]
+
+
+def test_send_time_is_asked_and_shared(api: SetupApi, monkeypatch: pytest.MonkeyPatch) -> None:
+    """TC-SET-012: Setup asks when you send your digest; the draft is prepared two hours earlier.
+
+    Given: a signed-in account and a copy of the app's settings on this Mac.
+    When: the profile is saved with "send by 18:00", then with an invalid time.
+    Then: config has send_deadline 18:00 and nudge_time 16:00; the cloud row and the local copy of
+          the app's settings get the same times; "25:00" is refused.
+    """
+    from workdigest.config import draft_time_for
+
+    sent: list[dict[str, object]] = []
+
+    class Rest:
+        user_id = "u-1"
+
+        def __init__(self, *_a: object) -> None:
+            pass
+
+        def upsert(self, _table: str, rows: list[dict[str, object]], _key: str) -> None:
+            sent.extend(rows)
+
+    monkeypatch.setattr("workdigest.setup.api.Rest", Rest)
+    api.deps.secrets.set("supabase-refresh-token", "r-1")
+    (api.paths.home / "cloud_settings.json").write_text(
+        '{"provider": "cursor_cli", "send_deadline": "21:00:00"}'
+    )
+    profile = {"name": "Arjun K", "emails": ["arjun.k@ei.study"], "manager_name": "David"}
+    assert api.profile({**profile, "send_by": "18:00"})["nudge_time"] == "16:00"
+    config = load_config(api.paths.config_path)
+    assert (config.digest.send_deadline, config.digest.nudge_time) == ("18:00", "16:00")
+    assert sent[0]["send_deadline"] == "18:00"
+    assert (
+        json.loads((api.paths.home / "cloud_settings.json").read_text())["provider"] == "cursor_cli"
+    )
+    assert api.state()["profile"]["send_by"] == "18:00"
+    with pytest.raises(SetupError, match="time"):
+        api.profile({**profile, "send_by": "25:00"})
+    assert (draft_time_for("17:30"), draft_time_for("01:00")) == ("15:30", "00:00")

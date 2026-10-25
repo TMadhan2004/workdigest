@@ -7,6 +7,9 @@ kept in memory until the sign-in succeeds (for "I've confirmed my email").
 
 from __future__ import annotations
 
+import json
+import logging
+import re
 import subprocess
 import uuid
 from collections.abc import Callable
@@ -19,7 +22,8 @@ from typing import Any
 from workdigest import config_write
 from workdigest.clock import now_local
 from workdigest.cloud.client import CloudAuth, CloudError, Rest
-from workdigest.config import Config, ConfigError, load_config
+from workdigest.cloud.sync import SETTINGS_FILE, mac_timezone
+from workdigest.config import Config, ConfigError, draft_time_for, load_config
 from workdigest.digest import onboarding
 from workdigest.hooks import installer
 from workdigest.integrations.http import HttpError
@@ -31,6 +35,7 @@ from workdigest.service import LaunchAgent
 from workdigest.setup.team import Team, load_team
 from workdigest.store.db import Store
 
+log = logging.getLogger(__name__)
 CLAUDE_SETTINGS = Path("~/.claude/settings.json").expanduser()
 CURSOR_HOOKS = Path("~/.cursor/hooks.json").expanduser()
 SKIP_DIRS = {"node_modules", "Library", "Applications", "Pictures", "Music", "Movies", "venv"}
@@ -153,6 +158,8 @@ class SetupApi:
                 or [e for e in [self.deps.git("config", "--global", "user.email")] if e],
                 "manager_name": config.digest.manager_name,
                 "team_members": config.digest.team_members,
+                "send_by": config.digest.send_deadline,
+                "draft_at": config.digest.nudge_time,
             },
             "conversation": {"learned": (self.paths.home / "template.json").exists()},
             "repos": [str(r.path) for r in config.repos],
@@ -231,20 +238,47 @@ class SetupApi:
 
     # ---------------------------------------------------------------- profile
     def profile(self, body: dict[str, Any]) -> dict[str, Any]:
-        """Your name, git emails, manager and usual teammates."""
+        """Your name, git emails, manager, usual teammates and when you send your digest."""
         name = str(body.get("name", "")).strip()
         emails = [str(e).strip() for e in body.get("emails", []) if str(e).strip()]
         manager = str(body.get("manager_name", "")).strip()
         if not name or not emails or not manager:
             raise SetupError("enter your name, at least one git email and your manager's name")
+        send_by = str(body.get("send_by") or self.config.digest.send_deadline).strip()[:5]
+        if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", send_by):
+            raise SetupError("choose the time you send your digest, e.g. 18:00")
         team = [str(t).strip() for t in body.get("team_members", []) if str(t).strip()]
+        times = {"send_deadline": send_by, "nudge_time": draft_time_for(send_by)}
         self._write(
             {
                 "identity": {"name": name, "author_emails": emails},
-                "digest": {"manager_name": manager, "team_members": team},
+                "digest": {"manager_name": manager, "team_members": team, **times},
             }
         )
-        return {"saved": True}
+        self._share_times(times)
+        return {"saved": True, **times}
+
+    def _share_times(self, times: dict[str, str]) -> None:
+        """The app owns the times after setup: update the cloud row and this Mac's copy of it."""
+        overrides = self.paths.home / SETTINGS_FILE
+        if overrides.exists():
+            try:
+                data = json.loads(overrides.read_text(encoding="utf-8"))
+            except ValueError:
+                data = {}
+            overrides.write_text(json.dumps({**data, **times}, indent=2), encoding="utf-8")
+        if not self._signed_in():
+            return
+        try:
+            rest = Rest(self._auth(), self.team.publishable_key)
+            row = {"user_id": rest.user_id, **times}
+            if zone := mac_timezone():
+                row["timezone"] = zone
+            rest.upsert("settings", [row], "user_id")
+        except (CloudError, HttpError) as exc:
+            log.warning(
+                "could not share the times with the app yet: %s", exc
+            )  # pushed on the next sync
 
     # ----------------------------------------------------------- conversation
     def conversation_preview(self, body: dict[str, Any]) -> dict[str, Any]:

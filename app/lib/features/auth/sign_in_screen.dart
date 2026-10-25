@@ -61,11 +61,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     Center(
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(colors: context.aurora.heroGradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          borderRadius: const BorderRadius.all(Radius.circular(24)),
                           boxShadow: [BoxShadow(color: context.aurora.heroGradient[1].withValues(alpha: 0.45), blurRadius: 32)],
                         ),
-                        child: SizedBox.square(dimension: 88, child: Icon(Icons.edit_note_rounded, size: 44, color: context.aurora.onHero)),
+                        // The WorkDigest logo: the same artwork as the app icon and the website.
+                        child: Image.asset('assets/branding/logo.png', width: 88, height: 88, semanticLabel: 'WorkDigest logo'),
                       ),
                     ),
                     const SizedBox(height: Space.m),

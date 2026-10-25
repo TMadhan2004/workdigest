@@ -117,7 +117,7 @@ def test_synthetic_day_end_to_end(paths: Paths, cloud_config: Config, tmp_path: 
            and a cloud with the 20:00 scheduled draft job queued (nudge: true).
     When: the daemon ticks at 20:05 and again at 20:46, then the app marks the digest sent.
     Then: the job is done; the pushed digest cites the 644/644 test run and EIT-8403 with evidence;
-          "Draft ready – send before 9pm" appears on the Mac and as an app notification; one
+          "Draft ready – send by 21:00" appears on the Mac and as an app notification; one
           "Send before 21:00" reminder fires; afterwards the cloud reports the digest as sent.
     """
     repo = tmp_path / "billing-service"
@@ -161,8 +161,8 @@ def test_synthetic_day_end_to_end(paths: Paths, cloud_config: Config, tmp_path: 
     assert any(
         e.get("kind") == "test_run" and "644" in json.dumps(e) for e in tables.rows["evidence"]
     )
-    assert tables.rows["notifications"][0]["title"] == "Draft ready – send before 9pm"
-    assert notes.sent[0][0] == "Draft ready – send before 9pm"
+    assert tables.rows["notifications"][0]["title"] == "Draft ready – send by 21:00"
+    assert notes.sent[0][0] == "Draft ready – send by 21:00"
     assert notes.sent[0][1].endswith("gaps to confirm")
 
     store = Store.open(paths.db_path)

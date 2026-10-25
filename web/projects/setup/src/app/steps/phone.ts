@@ -41,8 +41,10 @@ export function qrDataUrl(text: string): string {
     } @else {
       <section class="hero card rise">
         <h2 class="display">You're all set</h2>
-        <p class="muted">WorkDigest is running. Around 8pm your draft will be ready on your phone. Review it, then
-          copy it into WhatsApp yourself. You can close this tab.</p>
+        <p class="muted">WorkDigest is running. Your draft will be ready on your phone at
+          {{ wizard.state()?.profile?.draft_at }}, and your phone reminds you before
+          {{ wizard.state()?.profile?.send_by }} on weekdays. Review it, then copy it into WhatsApp yourself.
+          You can close this tab.</p>
         <p class="muted small">To change anything later, run <code>digest setup</code> in Terminal.</p>
       </section>
     }

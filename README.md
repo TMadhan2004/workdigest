@@ -19,7 +19,7 @@ Website and downloads: **https://workdigest.vercel.app**
    - starting the background service.
 2. **On your Android phone**, install the app from the website and sign in with the same email and password.
 
-Around 8 pm your draft is ready on your phone. To change anything later, run `digest setup` again. To pause WorkDigest, run `digest service stop`; `digest service start` starts it again. When there's a new version, the phone and the Mac tell you: install it from the app, or run `digest update` on the Mac.
+Two hours before the time you send your digest (you choose it during setup) the draft is ready on your phone, and on weekdays the phone reminds you an hour and a half before. To change anything later, run `digest setup` again. To pause WorkDigest, run `digest service stop`; `digest service start` starts it again. When there's a new version, the phone and the Mac tell you: install it from the app, or run `digest update` on the Mac.
 
 ## What is in this repository
 

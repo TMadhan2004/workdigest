@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import re
 import tomllib
+from datetime import timedelta
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -149,6 +151,16 @@ class TransmitSettings(_Strict):
     commit_subjects: bool = True
 
 
+DRAFT_LEAD = timedelta(hours=2)  # the draft is prepared this long before the send-by time
+
+
+def draft_time_for(send_by: str) -> str:
+    """The draft time for a send-by time: two hours earlier ("18:00" → "16:00"), never before 00:00."""
+    hours, minutes = (int(part) for part in send_by.split(":")[:2])
+    total = max(0, hours * 60 + minutes - int(DRAFT_LEAD.total_seconds() // 60))
+    return f"{total // 60:02d}:{total % 60:02d}"
+
+
 class DigestSettings(_Strict):
     """Digest generation."""
 
@@ -158,8 +170,9 @@ class DigestSettings(_Strict):
     manager_name: str = ""  # asked during `digest setup`
     project: str = ""
     team_members: list[str] = Field(default_factory=list)
+    # When you send your digest (asked in `digest setup`, changeable in the app).
     send_deadline: str = Field(default="21:00", pattern=r"^\d{2}:\d{2}$")
-    # Local evening draft + desktop nudge (cloud users get the time from Supabase settings).
+    # When the draft is prepared; setup and the app set it two hours before send_deadline.
     nudge_time: str = Field(default="20:00", pattern=r"^\d{2}:\d{2}$")
 
 
@@ -206,7 +219,7 @@ def load_config(path: Path) -> Config:
 
 
 def _apply_cloud_overrides(data: dict[str, Any], overrides: Path) -> None:
-    """Settings changed in the app (provider, transmit flags) win over config.toml."""
+    """Settings changed in the app (provider, transmit flags, times) win over config.toml."""
     if not overrides.exists():
         return
     try:
@@ -216,6 +229,14 @@ def _apply_cloud_overrides(data: dict[str, Any], overrides: Path) -> None:
     provider = cloud.get("provider")
     if provider in {"cursor_cli", "claude_cli", "none"}:
         data["digest"] = {**(data.get("digest") or {}), "provider": provider}
+    # The send-by and draft times chosen in the app ("HH:MM" or Postgres "HH:MM:SS").
+    times = {
+        key: str(cloud[key])[:5]
+        for key in ("nudge_time", "send_deadline")
+        if isinstance(cloud.get(key), str) and re.fullmatch(r"\d{2}:\d{2}(:\d{2})?", cloud[key])
+    }
+    if times:
+        data["digest"] = {**(data.get("digest") or {}), **times}
     transmit = {
         key: value
         for key, value in (cloud.get("transmit") or {}).items()
@@ -266,8 +287,9 @@ provider = "cursor_cli"
 manager_name = ""
 project = ""
 team_members = []
+# When you send your digest, and when the draft is prepared (two hours earlier).
 send_deadline = "21:00"
-nudge_time = "20:00"
+nudge_time = "19:00"
 
 # What may be sent to the LLM. Check your company's policy on code-derived data first.
 [transmit]

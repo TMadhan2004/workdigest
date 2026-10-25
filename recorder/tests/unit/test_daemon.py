@@ -223,7 +223,7 @@ def test_cloud_bridge_nudge_and_recovery(paths: Paths, config: Config, store: St
     Given: a client factory that fails once, then a fake cloud with a queued scheduled draft job (nudge: true).
     When: the bridge ticks twice.
     Then: the first tick logs and keeps going; the second runs the job and shows
-          "Draft ready – send before 9pm" with the gap count on the Mac.
+          "Draft ready – send by 21:00" with the gap count on the Mac.
     """
     cfg = _cloud(config)
     tables = FakeTables()
@@ -246,7 +246,7 @@ def test_cloud_bridge_nudge_and_recovery(paths: Paths, config: Config, store: St
     bridge.tick(store)
     assert tables.rows["generation_jobs"][0]["status"] == "done"
     assert notes.sent
-    assert notes.sent[0][0] == "Draft ready – send before 9pm"
+    assert notes.sent[0][0] == "Draft ready – send by 21:00"
     assert notes.sent[0][1].startswith("Mon 26 Oct: ")
     assert notes.sent[0][1].endswith("gaps to confirm")
 

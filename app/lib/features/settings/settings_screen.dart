@@ -9,13 +9,14 @@ import 'package:work_tracker/core/widgets/states.dart';
 import 'package:work_tracker/data/models/json.dart';
 import 'package:work_tracker/data/models/models.dart';
 import 'package:work_tracker/data/providers.dart';
+import 'package:work_tracker/features/reminders/reminders.dart';
 import 'package:work_tracker/features/timeline/timeline_screen.dart';
 
 final AutoDisposeFutureProvider<AppSettings> settingsProvider = FutureProvider.autoDispose<AppSettings>((ref) => ref.watch(settingsRepositoryProvider).load());
 
 final AutoDisposeFutureProvider<Json?> templateProvider = FutureProvider.autoDispose<Json?>((ref) => ref.watch(settingsRepositoryProvider).activeTemplate());
 
-/// Nudge time, deadline, LLM provider, what is sent, the template, and the account.
+/// Your digest time and reminders, LLM provider, what is sent, hidden sessions and the template.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -95,26 +96,30 @@ class _SettingsBodyState extends ConsumerState<_SettingsBody> {
           onSelectionChanged: (value) => unawaited(ref.read(themeModeProvider.notifier).set(value.single)),
         ),
         const SizedBox(height: Space.l),
-        Text('Evening', style: theme.textTheme.titleMedium),
+        Text('Your digest time', style: theme.textTheme.titleMedium),
         Card(
           child: Column(
             children: [
+              ListTile(
+                title: const Text('Send your digest by'),
+                subtitle: Text('The draft is prepared at ${_settings.nudgeTime}, two hours earlier'),
+                trailing: Text(_settings.sendDeadline, style: theme.textTheme.titleMedium),
+                onTap: () => _pickTime(
+                  _settings.sendDeadline,
+                  (t) => _save(_settings.copyWith(sendDeadline: t, nudgeTime: draftTimeFor(t))),
+                ),
+              ),
               SwitchListTile(
-                title: const Text('Draft automatically'),
-                subtitle: const Text('Queue the draft at the nudge time'),
+                title: const Text('Prepare the draft automatically'),
+                subtitle: Text('At ${_settings.nudgeTime} on your Mac'),
                 value: _settings.autoDraft,
                 onChanged: (value) => _save(_settings.copyWith(autoDraft: value)),
               ),
-              ListTile(
-                title: const Text('Nudge time'),
-                subtitle: const Text('"Draft ready, N gaps to confirm"'),
-                trailing: Text(_settings.nudgeTime, style: theme.textTheme.titleMedium),
-                onTap: () => _pickTime(_settings.nudgeTime, (t) => _save(_settings.copyWith(nudgeTime: t))),
-              ),
-              ListTile(
-                title: const Text('Send before'),
-                trailing: Text(_settings.sendDeadline, style: theme.textTheme.titleMedium),
-                onTap: () => _pickTime(_settings.sendDeadline, (t) => _save(_settings.copyWith(sendDeadline: t))),
+              SwitchListTile(
+                title: const Text('Remind me on this phone'),
+                subtitle: Text('Monday to Friday at ${reminderTimeFor(_settings.sendDeadline)}, an hour and a half before'),
+                value: ref.watch(remindersEnabledProvider),
+                onChanged: (on) => unawaited(ref.read(remindersEnabledProvider.notifier).set(on: on)),
               ),
             ],
           ),
@@ -217,7 +222,7 @@ class _HiddenSessions extends ConsumerWidget {
   }
 }
 
-/// Edit section titles and guidance of the active template (the Mac uses it from the next draft).
+/// The sections of your digest, in order: edit, add or delete (the Mac uses them from the next draft).
 class _TemplateEditor extends ConsumerWidget {
   const _TemplateEditor();
 
@@ -237,7 +242,7 @@ class _TemplateEditor extends ConsumerWidget {
             if (body == null) {
               return const Card(
                 child: ListTile(
-                  title: Text('Using the built-in 11-point template'),
+                  title: Text('Using the built-in template'),
                   subtitle: Text('The Mac uploads it on its next sync; you can then edit it here.'),
                 ),
               );
@@ -250,9 +255,23 @@ class _TemplateEditor extends ConsumerWidget {
                     ListTile(
                       title: Text('${i + 1}. ${str(sections[i], 'title')}'),
                       subtitle: Text(str(sections[i], 'guidance'), maxLines: 2, overflow: TextOverflow.ellipsis),
-                      trailing: const Icon(Icons.edit_outlined),
                       onTap: () => _editSection(context, ref, body, i),
+                      trailing: PopupMenuButton<String>(
+                        tooltip: 'Section options',
+                        onSelected: (choice) => choice == 'edit' ? _editSection(context, ref, body, i) : _deleteSection(context, ref, body, i),
+                        itemBuilder: (_) => [
+                          const PopupMenuItem(value: 'edit', child: Text('Edit')),
+                          PopupMenuItem(value: 'delete', enabled: sections.length > 1, child: const Text('Delete')),
+                        ],
+                      ),
                     ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.add_rounded),
+                    title: const Text('Add section'),
+                    subtitle: const Text('Added at the end; the AI writes it from your guidance'),
+                    onTap: () => _addSection(context, ref, body),
+                  ),
                 ],
               ),
             );
@@ -262,39 +281,136 @@ class _TemplateEditor extends ConsumerWidget {
     );
   }
 
-  Future<void> _editSection(BuildContext context, WidgetRef ref, Json body, int index) async {
-    final sections = [for (final s in objects(body, 'sections')) Map<String, dynamic>.of(s)];
-    final title = TextEditingController(text: str(sections[index], 'title'));
-    final guidance = TextEditingController(text: str(sections[index], 'guidance'));
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit section'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: title, decoration: const InputDecoration(labelText: 'Title')),
-              const SizedBox(height: Space.m),
-              TextField(controller: guidance, maxLines: 5, decoration: const InputDecoration(labelText: 'Guidance for the draft')),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Save')),
-        ],
-      ),
-    );
-    final newTitle = title.text.trim();
-    final newGuidance = guidance.text.trim();
-    title.dispose();
-    guidance.dispose();
-    if (!(saved ?? false) || newTitle.isEmpty) return;
-    sections[index] = {...sections[index], 'title': newTitle, 'guidance': newGuidance};
+  Future<void> _save(WidgetRef ref, Json body, List<Map<String, dynamic>> sections) async {
     final version = 'app-${DateTime.now().millisecondsSinceEpoch}';
     await ref.read(settingsRepositoryProvider).saveTemplate({...body, 'sections': sections}, version: version);
     ref.invalidate(templateProvider);
-    unawaited(Future<void>.value());
+  }
+
+  Future<void> _editSection(BuildContext context, WidgetRef ref, Json body, int index) async {
+    final sections = [for (final s in objects(body, 'sections')) Map<String, dynamic>.of(s)];
+    final result = await showDialog<SectionInput>(
+      context: context,
+      builder: (_) => _SectionDialog(title: 'Edit section', initial: SectionInput(str(sections[index], 'title'), str(sections[index], 'guidance'))),
+    );
+    if (result == null) return;
+    sections[index] = {...sections[index], 'title': result.title, 'guidance': result.guidance};
+    await _save(ref, body, sections);
+  }
+
+  Future<void> _addSection(BuildContext context, WidgetRef ref, Json body) async {
+    final sections = [for (final s in objects(body, 'sections')) Map<String, dynamic>.of(s)];
+    final result = await showDialog<SectionInput>(
+      context: context,
+      builder: (_) => const _SectionDialog(title: 'Add section', initial: SectionInput('', '')),
+    );
+    if (result == null) return;
+    final key = customSectionKey(result.title, {for (final s in sections) str(s, 'key')});
+    sections.add({'key': key, 'title': result.title, 'guidance': result.guidance, 'required': true, 'inline': false});
+    await _save(ref, body, sections);
+  }
+
+  Future<void> _deleteSection(BuildContext context, WidgetRef ref, Json body, int index) async {
+    final sections = [for (final s in objects(body, 'sections')) Map<String, dynamic>.of(s)];
+    if (sections.length <= 1) return;
+    final title = str(sections[index], 'title');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: Text('Delete "$title"?'),
+        content: const Text('Drafts from now on leave this section out. Digests already written keep it.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialog, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialog, true), child: const Text('Delete')),
+        ],
+      ),
+    );
+    if (!(confirmed ?? false)) return;
+    sections.removeAt(index);
+    await _save(ref, body, sections);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('"$title" deleted'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => unawaited(_save(ref, body, [for (final s in objects(body, 'sections')) Map<String, dynamic>.of(s)])),
+          ),
+        ),
+      );
+    }
+  }
+}
+
+/// A section's title and guidance, as typed.
+@immutable
+class SectionInput {
+  const SectionInput(this.title, this.guidance);
+
+  final String title;
+  final String guidance;
+}
+
+/// "Customer impact" → "custom_customer_impact" (made unique against [taken]).
+String customSectionKey(String title, Set<String> taken) {
+  final slug = title.toLowerCase().replaceAll(RegExp('[^a-z0-9]+'), '_').replaceAll(RegExp(r'^_+|_+$'), '');
+  final base = 'custom_${slug.isEmpty ? 'section' : (slug.length > 30 ? slug.substring(0, 30) : slug)}';
+  var key = base;
+  for (var n = 2; taken.contains(key); n++) {
+    key = '${base}_$n';
+  }
+  return key;
+}
+
+class _SectionDialog extends StatefulWidget {
+  const _SectionDialog({required this.title, required this.initial});
+
+  final String title;
+  final SectionInput initial;
+
+  @override
+  State<_SectionDialog> createState() => _SectionDialogState();
+}
+
+class _SectionDialogState extends State<_SectionDialog> {
+  late final _title = TextEditingController(text: widget.initial.title);
+  late final _guidance = TextEditingController(text: widget.initial.guidance);
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _guidance.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: _title, autofocus: true, decoration: const InputDecoration(labelText: 'Title')),
+            const SizedBox(height: Space.m),
+            TextField(
+              controller: _guidance,
+              maxLines: 5,
+              decoration: const InputDecoration(labelText: 'Guidance for the draft', hintText: 'What this section should say, e.g. "One line per customer-facing change"'),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        ValueListenableBuilder(
+          valueListenable: _title,
+          builder: (context, value, _) => FilledButton(
+            onPressed: value.text.trim().isEmpty ? null : () => Navigator.pop(context, SectionInput(_title.text.trim(), _guidance.text.trim())),
+            child: const Text('Save'),
+          ),
+        ),
+      ],
+    );
   }
 }

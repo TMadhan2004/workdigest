@@ -1,5 +1,5 @@
 # WorkDigest monorepo tasks. `make check` runs everything CI runs.
-.PHONY: help setup lint typecheck test coverage catalog catalog-check db-test app-check e2e-fixture public-check tokens tokens-check web web-check site wheel check clean
+.PHONY: help setup lint typecheck test coverage catalog catalog-check db-test app-check e2e-fixture public-check tokens tokens-check web web-check site screens wheel check clean
 
 RECORDER := recorder
 UV := uv --directory $(RECORDER)
@@ -58,6 +58,11 @@ web-check: tokens-check ## Web: setup wizard and website builds, unit tests, Pla
 	cd web && npx ng test setup --watch=false --browsers=ChromeHeadless
 	cd web && npx ng test site --watch=false --browsers=ChromeHeadless
 	cd web && npx playwright test
+
+screens: ## Render real app screens (demo data) into the website: web/projects/site/public/screens/*.webp
+	cd app && flutter test --no-pub test/screens --dart-define=SCREENS=true --update-goldens
+	mkdir -p web/projects/site/public/screens
+	for f in app/build/screens/*.png; do cwebp -quiet -q 82 -resize 600 0 "$$f" -o "web/projects/site/public/screens/$$(basename "$$f" .png).webp"; done
 
 site: ## Build the website into web/dist/site/browser (SITE_URL, GITHUB_REPOSITORY, VERSION_JSON optional)
 	cd web && npm ci --no-audit --no-fund && npm run build:site

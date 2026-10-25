@@ -238,7 +238,9 @@ def _run_job(
             )
         digest_id, draft = create_draft(ctx, day, llm=provider_factory(ctx))
         nudge = bool(params.get("nudge"))
-        note = _notify_draft(tables, digest_id, draft, nudge=nudge)
+        note = _notify_draft(
+            tables, digest_id, draft, nudge=nudge, send_by=ctx.config.digest.send_deadline
+        )
         wanted_ai = ctx.config.digest.provider != "none" and ctx.config.transmit.llm_enabled
         fell_back = wanted_ai and draft.provider == "none"
         return {
@@ -272,9 +274,11 @@ def _summary(digest_id: str, draft: Draft) -> dict[str, Any]:
     }
 
 
-def _notify_draft(tables: Tables, digest_id: str, draft: Draft, *, nudge: bool) -> tuple[str, str]:
+def _notify_draft(
+    tables: Tables, digest_id: str, draft: Draft, *, nudge: bool, send_by: str = ""
+) -> tuple[str, str]:
     to_confirm = sum(1 for g in draft.gaps if g.kind != "input")
-    title = "Draft ready" if not nudge else "Draft ready – send before 9pm"
+    title = f"Draft ready – send by {send_by}" if nudge and send_by else "Draft ready"
     body = f"{draft.work_date:%a %d %b}: {to_confirm} gaps to confirm"
     tables.insert(
         "notifications",

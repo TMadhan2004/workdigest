@@ -13,7 +13,7 @@ interface Step {
 
 export const STEPS: Step[] = [
   {
-    screen: 'capture',
+    screen: 'timeline',
     time: 'All day',
     title: 'It notices your work, quietly',
     simple:
@@ -22,8 +22,8 @@ export const STEPS: Step[] = [
       'Hooks in Claude Code and Cursor append events to a local spool; a launchd daemon ingests them into SQLite every minute, polls git every 5 minutes and Jira/Bitbucket (read-only scoped tokens) every 30. Everything is redacted on the way in.',
   },
   {
-    screen: 'evidence',
-    time: 'Evening',
+    screen: 'draft',
+    time: 'Before drafting',
     title: 'Facts first, claims second',
     simple:
       "Not everything counts the same. A commit or a passing test is a fact. An AI saying 'done' is only a claim. Personal side projects you hide never reach your digest.",
@@ -31,26 +31,26 @@ export const STEPS: Step[] = [
       'Each item becomes cited evidence with a strength: commits (C), tests (T), branches (B), Jira (J) and PRs (R) are facts; agent sessions (S) are claims. Hidden sessions and My-rules filters are applied in code before anything is drafted.',
   },
   {
-    screen: 'draft',
-    time: '8 pm',
+    screen: 'today',
+    time: 'Two hours before you send',
     title: 'A draft in your own format',
     simple:
-      "At 8 pm your draft is ready, laid out the way you always write it, with your sections, your greeting and your manager's name. Anything the evidence can't back up is highlighted for you to check.",
+      "You choose when you send your digest, at 17:00, 18:30 or whenever suits you. Two hours earlier your draft is ready, laid out the way you always write it, with your sections, your greeting and your manager's name. Anything the evidence can't back up is highlighted for you to check.",
     technical:
       'Your template is learned from past digests at setup. Code writes the header, Testing/Commits, PRs and the closing; the LLM (your own Cursor or Claude subscription) writes the narrative as JSON citing evidence ids; every statement is grounded, and invented numbers or tickets are flagged.',
   },
   {
-    screen: 'review',
-    time: '8:05 pm',
+    screen: 'asks',
+    time: 'An hour and a half before',
     title: 'Review in a couple of minutes',
     simple:
-      "Your phone shows what to confirm and what your manager asked for. Tick asks Done (with proof) or Disagree (with a reason). Both show up in the digest's closing.",
+      "On weekdays your phone reminds you an hour and a half before your time. It shows what to confirm and what your manager asked for. Tick asks Done (with proof) or Disagree (with a reason). Both show up in the digest's closing.",
     technical:
       "Compliance checks run your manager's standing rules against the text; gaps list missing sections, unverified lines and asks needing a real action. Ask state syncs live through Supabase realtime with row-level security.",
   },
   {
-    screen: 'share',
-    time: '8:10 pm',
+    screen: 'history',
+    time: 'By your send time',
     title: 'You send it, always',
     simple: 'Copy the digest and paste it into WhatsApp yourself. WorkDigest never messages anyone on your behalf.',
     technical:
@@ -70,15 +70,17 @@ export const STEPS: Step[] = [
       </header>
       <div class="story-grid">
         <div class="story-sticky" aria-hidden="true">
-          <wd-phone [screen]="steps[active()].screen" />
+          @for (step of steps; track step.time; let i = $index) {
+            <div class="story-frame" [class.on]="i === active()"><wd-phone [screen]="step.screen" /></div>
+          }
           <div class="story-dots">
-            @for (step of steps; track step.screen; let i = $index) {
+            @for (step of steps; track step.time; let i = $index) {
               <span [class.on]="i === active()"></span>
             }
           </div>
         </div>
         <ol class="story-steps">
-          @for (step of steps; track step.screen; let i = $index) {
+          @for (step of steps; track step.time; let i = $index) {
             <li #stepEl class="story-step" [class.on]="i === active()" [attr.data-index]="i">
               <p class="eyebrow">{{ step.time }}</p>
               <h3>{{ step.title }}</h3>

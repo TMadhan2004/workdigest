@@ -28,7 +28,7 @@ bool shouldNotify(Release latest, AppVersion current, int? alreadyNotified) =>
 final notifications = FlutterLocalNotificationsPlugin();
 
 Future<void> initNotifications() => notifications.initialize(
-  settings: const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
+  settings: const InitializationSettings(android: AndroidInitializationSettings('ic_stat_workdigest')),
 );
 
 /// Runs in a background isolate started by Android.

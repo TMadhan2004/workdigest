@@ -39,51 +39,8 @@ html { scroll-behavior: smooth; scroll-padding-top: 88px; }
 /* The phone mockup */
 .phone { position: relative; width: min(300px, 78vw); aspect-ratio: 9 / 19; border-radius: 44px; padding: 12px; background: linear-gradient(160deg, #2a2733, #121116); box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12), 0 40px 90px rgba(0, 0, 0, 0.45); }
 .phone-notch { position: absolute; top: 20px; left: 50%; width: 76px; height: 22px; transform: translateX(-50%); border-radius: 12px; background: #000; z-index: 2; }
-.phone-screen { height: 100%; border-radius: 34px; overflow: hidden; background: radial-gradient(120% 60% at 20% 0%, #2b1f63, transparent 60%), radial-gradient(90% 50% at 100% 30%, #4a2a8f55, transparent 60%), #0e0d12; color: #f4f1fa; font-size: 12.5px; line-height: 1.45; }
-.ps { padding: 52px 18px 18px; display: grid; gap: 10px; animation: wd-screen var(--wd-page) var(--wd-fluid) both; }
-@keyframes wd-screen { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(0.98); } to { opacity: 1; transform: none; } }
-.ps p { margin: 0; }
-.ps-title { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
-.ps-muted { color: #b9b2c9; }
-.ps-pill { justify-self: start; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #123a2b; color: #a7f3cf; font-weight: 700; font-size: 11px; }
-.ps-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 0 0 #4ade80; animation: wd-pulse 2s infinite; }
-@keyframes wd-pulse { 0% { box-shadow: 0 0 0 0 #4ade8099; } 70% { box-shadow: 0 0 0 7px #4ade8000; } 100% { box-shadow: 0 0 0 0 #4ade8000; } }
-.ps-hero { padding: 16px; border-radius: 20px; background: linear-gradient(135deg, #4c1d95, #7c3aed 55%, #9333ea); box-shadow: 0 16px 34px #7c3aed55; }
-.ps-eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; font-weight: 800; color: #e9ddff; }
-.ps-big { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
-.ps-hero-muted { color: #e9ddff; }
-.ps-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.ps-stats div { display: grid; padding: 10px; border-radius: 14px; background: #1a1820cc; border: 1px solid #ffffff1f; }
-.ps-stats b { font-size: 18px; }
-.ps-stats span, .ps-row span { color: #b9b2c9; font-size: 11px; }
-.ps-row { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: 14px; background: #1a1820cc; border: 1px solid #ffffff1a; }
-.ps-row div { display: grid; }
-.ps-ico { width: 26px; height: 26px; border-radius: 8px; flex: none; }
-.ps-ico.claude { background: linear-gradient(135deg, #d97757, #f0a37f); }
-.ps-ico.cursor { background: linear-gradient(135deg, #3b3b3b, #8a8a8a); }
-.ps-ico.git { background: linear-gradient(135deg, #f05133, #ff8a65); }
-.ps-ico.test { background: linear-gradient(135deg, #16a34a, #4ade80); }
-.ps-ico.pr { background: linear-gradient(135deg, #2563eb, #60a5fa); }
-.ps-ev { padding: 9px 10px; border-radius: 12px; background: #1a1820cc; border: 1px solid #ffffff1a; }
-.ps-ev.muted { color: #b9b2c9; text-decoration: line-through; background: #15131b; border-style: dashed; }
-.tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px; margin-right: 6px; }
-.tag.fact { background: #123a2b; color: #a7f3cf; }
-.tag.claim { background: #3f2a10; color: #ffd49a; }
-.tag.hidden { background: #2e2152; color: #dccbff; }
-.ps-draft p { padding: 0 2px; }
-.ps-unverified { padding: 6px 10px !important; border-radius: 10px; background: #3f2a10; color: #ffd49a; }
-.ps-unverified em { font-style: normal; font-weight: 800; margin-left: 4px; text-decoration: underline; }
-.ps-gap { padding: 10px; border-radius: 12px; background: #2e2152; color: #dccbff; }
-.ps-gap.warn { background: #3f2a10; color: #ffd49a; }
-.ps-sub { margin-top: 6px !important; font-weight: 800; }
-.ps-ask { display: grid; gap: 6px; padding: 10px; border-radius: 12px; background: #1a1820cc; border: 1px solid #ffffff1a; }
-.ps-ask .btns { display: flex; gap: 6px; }
-.ps-ask em { font-style: normal; font-weight: 700; font-size: 11px; padding: 3px 9px; border-radius: 999px; background: #ffffff14; }
-.ps-ask em:first-child { background: linear-gradient(135deg, #b58cff, #d7b8ff); color: #1b0a3d; }
-.ps-share { text-align: center; justify-items: center; padding-top: 90px; }
-.ps-check { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; font-weight: 800; background: linear-gradient(135deg, #16a34a, #4ade80); color: #fff; animation: wd-pop 600ms var(--wd-settle) both; }
-@keyframes wd-pop { from { transform: scale(0.4); opacity: 0; } to { transform: none; opacity: 1; } }
-.ps-wa { margin-top: 18px; padding: 10px 12px; border-radius: 14px 14px 4px 14px; background: #005c4b; color: #e9fff9; text-align: left; max-width: 90%; }
+.phone-screen { height: 100%; border-radius: 34px; overflow: hidden; background: #0e0d12; padding-top: 30px; } /* room for the camera, like a status bar */
+.phone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
 
 /* Sections */
 .section { padding: 110px 0; }
@@ -93,6 +50,10 @@ html { scroll-behavior: smooth; scroll-padding-top: 88px; }
 /* Story: the phone stays put while the steps scroll past. */
 .story-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; }
 .story-sticky { position: sticky; top: 100px; align-self: start; display: grid; justify-items: center; gap: 18px; }
+/* The real screens are stacked; the one for the step you are reading fades in. */
+.story-frame { grid-area: 1 / 1; opacity: 0; transform: translate3d(0, 12px, 0) scale(0.97); transition: opacity var(--wd-page) var(--wd-fluid), transform var(--wd-page) var(--wd-fluid); }
+.story-frame.on { opacity: 1; transform: none; }
+.story-dots { grid-row: 2; }
 .story-dots { display: flex; gap: 8px; }
 .story-dots span { width: 8px; height: 8px; border-radius: 99px; background: var(--wd-hairline); transition: width var(--wd-page) var(--wd-settle), background var(--wd-standard); }
 .story-dots span.on { width: 26px; background: var(--wd-accent-1); }
@@ -207,12 +168,6 @@ main { overflow-x: clip; }
 .start-steps { grid-template-columns: minmax(0, 1fr); }
 .start-step, .codeblock code, wd-copy { min-width: 0; }
 wd-copy { display: block; }
-.ps-ico.ask { background: linear-gradient(135deg, #b58cff, #d7b8ff); }
-.ps-ico.jira { background: linear-gradient(135deg, #0052cc, #4c9aff); }
-.ps-row.faded { background: #15131b; border-style: dashed; }
-.ps-row.faded b, .ps-row.faded span { color: #b9b2c9; text-decoration: line-through; }
-.small-note { font-size: 11px; }
-.ps-draft { gap: 8px; font-size: 12px; }
 .bento .feature.wide:last-child { grid-column: 1 / -1; }
 .stage-list { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
 @media (max-width: 1000px) { .bento .feature.wide:last-child { grid-column: 1 / -1; } }

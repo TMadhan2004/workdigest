@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:work_tracker/core/router/router.dart';
 import 'package:work_tracker/core/theme/app_theme.dart';
 import 'package:work_tracker/data/providers.dart';
+import 'package:work_tracker/features/reminders/reminders.dart';
 import 'package:work_tracker/features/share/share_intake.dart';
 import 'package:work_tracker/features/update/update_service.dart';
 import 'package:work_tracker/features/update/update_ui.dart';
@@ -54,7 +55,9 @@ class _LiveResyncState extends ConsumerState<LiveResync> {
     _lifecycle = AppLifecycleListener(
       onResume: () {
         unawaited(ref.read(cloudSourceProvider).resync());
-        ref.invalidate(updateStatusProvider); // a release may have shipped while away
+        ref
+          ..invalidate(updateStatusProvider) // a release may have shipped while away
+          ..invalidate(reminderSyncProvider); // reschedule the coming weekdays' reminders
       },
     );
   }

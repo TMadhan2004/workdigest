@@ -54,6 +54,12 @@ export const FEATURES: Feature[] = [
     technical: 'Digests and their status are stored per work date; the calendar reads a month range in one query.',
   },
   {
+    icon: '◷',
+    title: 'Your time, your reminders',
+    simple: 'Pick when you send your digest. The draft is ready two hours before, and your phone reminds you on weekdays.',
+    technical: 'send_deadline drives a pg_cron draft job two hours earlier; the app schedules local notifications 90 minutes before, Monday to Friday.',
+  },
+  {
     icon: '✦',
     title: 'Your AI, your subscription',
     simple: 'Uses the Cursor or Claude Code you already pay for. If it stops working, you get facts only and an alert.',

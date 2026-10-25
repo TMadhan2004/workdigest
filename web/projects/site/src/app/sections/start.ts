@@ -55,7 +55,8 @@ export function qrDataUrl(text: string): string {
         <li wdReveal class="glass card start-step">
           <span class="stage-num" aria-hidden="true">3</span>
           <h3>Sign in, and that's it</h3>
-          <p>Use the same email and password as on your Mac. Around 8 pm your first draft is ready.</p>
+          <p>Use the same email and password as on your Mac. Your draft is ready two hours before the time you chose,
+            and your phone reminds you on weekdays.</p>
         </li>
       </ol>
     </section>

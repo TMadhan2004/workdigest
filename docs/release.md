@@ -69,6 +69,7 @@ Set them with `gh secret set NAME -R TMadhan2004/workdigest`, which asks for the
 ## Building locally
 
 ```sh
+make screens                                 # real app screens (demo data) for the website
 make wheel                                   # the Mac package in recorder/dist/
 make site                                    # the website in web/dist/site/browser/
 cd app && flutter build apk --release        # debug-signed unless the keystore env vars are set

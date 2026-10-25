@@ -103,6 +103,8 @@ This page is kept honest. Each item says what is affected and what the system do
 | Update installs | Android always asks the user to confirm an install, and asks once to allow installs from WorkDigest. | The update sheet says so. The SHA-256 is checked before Android sees the file. |
 | Background checks | WorkManager runs at most every ~6 hours and may be delayed by battery savers. | The app also checks on every open and resume. |
 | APK size | About 58 MB: one APK for all processor types, so one download link works for everyone. | Split per processor type later if size matters. |
+| Send reminders | Scheduled on the phone for the next two weeks each time the app opens, comes back or the time changes. They use inexact alarms (no special permission), so Android may deliver one a few minutes late. A phone that never opens the app for two weeks gets no more reminders. | Opening the app once reschedules them. The Mac still shows "Send before HH:MM" 15 minutes before. |
+| Draft time | The draft is prepared two hours before the send-by time; changing one sets both. | Close the day earlier to draft at once. |
 | Contributors widget | GitHub's repository sidebar is cached and can lag behind a rewritten history. | The contributors API is the source of truth. |
 
 ## Later phases (to verify before implementing)

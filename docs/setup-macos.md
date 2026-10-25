@@ -10,7 +10,7 @@ It installs WorkDigest in your home folder (with [uv](https://docs.astral.sh/uv/
 
 1. **Welcome**: what happens and what stays on the Mac.
 2. **Account**: your `@ei.study` email and a password, then the confirmation email.
-3. **You and your manager**: your name and git email (suggested from `git config`), your manager's first name, and the people you usually work with.
+3. **You and your manager**: your name and git email (suggested from `git config`), your manager's first name, **when you usually send your digest** (the draft is prepared two hours earlier, and the phone reminds you an hour and a half before, Monday to Friday), and the people you usually work with.
 4. **Your digest format**: upload a `.txt` or `.md` of past digests and replies, with `Me:` before each digest you sent and `Reply:` before each reply. You see the sections, greeting, header lines and sign-off learned from it before anything is saved. Your manager's open asks and rules are imported too.
 5. **Repositories**: pick a folder; the git repositories in it are found, and you tick the ones that count.
 6. **Jira and Bitbucket**: scoped, read-only tokens (the exact scopes are on the page and in section 6 below). They are stored in the Keychain only and tested at once.
@@ -153,7 +153,7 @@ digest cloud push
 digest cloud worker                           # foreground worker (the daemon in section 9 replaces this)
 ```
 
-At 20:00 your local time, a schedule in Supabase queues the evening draft. The Mac picks it up, generates the draft and posts "Draft ready, N gaps to confirm" to the app and to the Mac's Notification Centre.
+Two hours before your send-by time (`nudge_time`, set in setup or in the app), a schedule in Supabase queues the draft. The Mac picks it up, generates the draft and posts "Draft ready, N gaps to confirm" to the app and to the Mac's Notification Centre.
 
 ## 8. The app (Phase 5, Flutter)
 
@@ -197,13 +197,13 @@ The agent runs `digest daemon`, one process that does all the recurring work:
 |---|---|---|
 | Hook spool → SQLite | 1 min | |
 | Transcripts and git | 5 min | |
-| Cloud worker | 30 s | heartbeat, app edits, jobs from the app and the 20:00 schedule, push |
+| Cloud worker | 30 s | heartbeat, app edits, jobs from the app and the scheduled draft, push |
 | Jira and Bitbucket | 30 min | your PRs (open, approvals) and Jira activity; skipped without tokens |
 | Session summaries | 1 hour | cached; unchanged sessions cost no LLM call |
-| Evening draft | at `digest.nudge_time` (20:00) | only without cloud sync; with cloud the Supabase schedule queues it |
+| Draft | at `digest.nudge_time` (two hours before `send_deadline`) | only without cloud sync; with cloud the Supabase schedule queues it |
 | Send reminder | 15 min before `digest.send_deadline` | once a day, only if the digest isn't marked sent in the app |
 
-Notifications ("Draft ready – send before 9pm, N gaps to confirm" and "Send before 21:00") appear in macOS Notification Centre. The first one may ask to allow notifications for Script Editor/osascript. Logs: `logs/daemon.log` (rotated, 1 MB × 3) and `logs/launchd.err.log`. `digest doctor` shows whether the daemon is running.
+Notifications ("Draft ready – send by 18:00, N gaps to confirm" and "Send before 18:00", with your own time) appear in macOS Notification Centre. The phone also reminds you on weekdays, an hour and a half before your send-by time. The first one may ask to allow notifications for Script Editor/osascript. Logs: `logs/daemon.log` (rotated, 1 MB × 3) and `logs/launchd.err.log`. `digest doctor` shows whether the daemon is running.
 
 Stop any `digest cloud worker` you started by hand before starting the service, so only one process works the queue. A second worker is safe (jobs are claimed atomically), just wasteful.
 
@@ -224,6 +224,8 @@ Stop any `digest cloud worker` you started by hand before starting the service, 
   - The **Closed** tab filters by the day asks were closed: chips for recent days, or **Pick a day**.
 - **Open PRs** (Timeline) are your PRs from Bitbucket. The Mac refreshes them every 30 minutes and on every draft, and the list updates live. PRs that your confirmed rules exclude are folded under **Hidden by your rules**, exactly as they are left out of the digest.
 - **History** shows a month calendar. Each day's dot shows its digest: sent (green), edited (violet) or draft (amber). Tap a day to open it, and swipe or use the arrows to change month.
+- **Your digest time.** Settings → Your digest time → **Send your digest by**. The draft is prepared two hours earlier, and **Remind me on this phone** sends a reminder an hour and a half before, Monday to Friday (a day you marked sent is skipped).
+- **Digest template.** Settings → Digest template: tap a section to edit its title and guidance, use its ⋯ menu to delete it (with Undo), or **Add section** at the end. New sections are written by the AI from your guidance.
 - **Appearance.** Settings → Appearance: Dark (default), Light or System.
 
 ## Where data lives
