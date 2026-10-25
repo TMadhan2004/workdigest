@@ -1,0 +1,237 @@
+# Cut a release by hand: Actions → Release → Run workflow (from main).
+#
+# It runs every check, builds the signed Android app and the Mac package (with the setup
+# wizard inside), publishes a GitHub Release, writes version.json, and deploys the website to
+# Vercel. Phones see the new version within hours (or when the app is next opened); Macs within
+# a day. Downloads always point at the newest release.
+#
+# Repository variables: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY (public by design), SITE_URL.
+# Repository secrets: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
+#   ANDROID_KEY_PASSWORD, VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version, e.g. 0.2.0"
+        required: true
+      notes:
+        description: "What's new (the first line is shown in the phone notification)"
+        required: true
+      min_build:
+        description: "Oldest app build that may keep working; older ones must update (0 = none)"
+        default: "0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Check the request
+    runs-on: ubuntu-latest
+    outputs:
+      tag: v${{ inputs.version }}
+      build: ${{ steps.build.outputs.number }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Version, branch and tag
+        env:
+          VERSION: ${{ inputs.version }}
+          MIN_BUILD: ${{ inputs.min_build }}
+        run: |
+          [[ "$GITHUB_REF" == "refs/heads/main" ]] || { echo "::error::Releases are cut from main"; exit 1; }
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Version must look like 1.2.3"; exit 1; }
+          [[ "$MIN_BUILD" =~ ^[0-9]+$ ]] || { echo "::error::min_build must be a number"; exit 1; }
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then echo "::error::v$VERSION already exists"; exit 1; fi
+      - id: build
+        # Android needs an ever-increasing build number: the release run number does that.
+        run: echo "number=$((100 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+
+  checks:
+    needs: validate
+    uses: ./.github/workflows/ci.yml
+
+  android:
+    name: Signed Android app
+    needs: [validate, checks]
+    runs-on: ubuntu-latest
+    outputs:
+      sha256: ${{ steps.apk.outputs.sha256 }}
+      size: ${{ steps.apk.outputs.size }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.4
+          cache: true
+      - name: Keystore
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+      - name: Build
+        working-directory: app
+        env:
+          WORKDIGEST_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          WORKDIGEST_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          WORKDIGEST_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          WORKDIGEST_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          VERSION: ${{ inputs.version }}
+          BUILD: ${{ needs.validate.outputs.build }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          flutter pub get
+          flutter build apk --release \
+            --build-name="$VERSION" --build-number="$BUILD" \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY" \
+            --dart-define=SITE_URL="$SITE_URL"
+      - id: apk
+        name: Name, checksum and size
+        run: |
+          cp app/build/app/outputs/flutter-apk/app-release.apk WorkDigest.apk
+          # The release must be signed with our key, never the debug one.
+          apksigner="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort | tail -1)"
+          certs="$("$apksigner" verify --print-certs WorkDigest.apk)"
+          if grep -q "CN=Android Debug" <<<"$certs"; then echo "::error::The APK is signed with the debug key; check the keystore secrets"; exit 1; fi
+          echo "sha256=$(sha256sum WorkDigest.apk | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "size=$(stat -c %s WorkDigest.apk)" >> "$GITHUB_OUTPUT"
+      - run: rm -f "$RUNNER_TEMP/release.keystore"
+        if: always()
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: WorkDigest.apk
+
+  mac:
+    name: Mac package (with the setup wizard)
+    needs: [validate, checks]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: make web
+      - name: Version and team settings
+        env:
+          VERSION: ${{ inputs.version }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          sed -i "s/^version = \".*\"/version = \"$VERSION\"/" recorder/pyproject.toml
+          python3 - <<'PY'
+          import json, os
+          team = {
+              "cloud_url": os.environ["SUPABASE_URL"],
+              "publishable_key": os.environ["SUPABASE_PUBLISHABLE_KEY"],
+              "site_url": os.environ["SITE_URL"],
+              "domain": "ei.study",
+          }
+          with open("recorder/src/workdigest/setup/team.json", "w") as f:
+              json.dump(team, f, indent=2)
+          PY
+      - run: cd recorder && uv build --wheel --out-dir ../dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/*.whl
+
+  publish:
+    name: GitHub Release, version.json and the website
+    needs: [validate, android, mac]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: version.json
+        env:
+          VERSION: ${{ inputs.version }}
+          NOTES: ${{ inputs.notes }}
+          MIN_BUILD: ${{ inputs.min_build }}
+          BUILD: ${{ needs.validate.outputs.build }}
+          TAG: ${{ needs.validate.outputs.tag }}
+          SHA256: ${{ needs.android.outputs.sha256 }}
+          SIZE: ${{ needs.android.outputs.size }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          python3 - <<'PY'
+          import datetime, glob, json, os
+          env = os.environ
+          base = f"https://github.com/{env['GITHUB_REPOSITORY']}/releases/download/{env['TAG']}"
+          wheel = os.path.basename(glob.glob("artifacts/*.whl")[0])
+          release = {
+              "version": env["VERSION"],
+              "notes": env["NOTES"],
+              "published_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+              "android": {
+                  "version": env["VERSION"],
+                  "build": int(env["BUILD"]),
+                  "apk_url": f"{base}/WorkDigest.apk",
+                  "sha256": env["SHA256"],
+                  "size": int(env["SIZE"]),
+                  "min_build": int(env["MIN_BUILD"]),
+                  "notes": env["NOTES"],
+              },
+              "mac": {
+                  "version": env["VERSION"],
+                  "wheel_url": f"{base}/{wheel}",
+                  "install": f"curl -fsSL {env['SITE_URL'].rstrip('/')}/install.sh | bash",
+              },
+          }
+          with open("artifacts/version.json", "w") as f:
+              json.dump(release, f, indent=2)
+          PY
+          sed "s#__SITE_URL__#${SITE_URL%/}#g" install/install.sh > artifacts/install.sh
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.validate.outputs.tag }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          {
+            printf '%s\n\n' "$NOTES"
+            echo "Android: download WorkDigest.apk (the app also offers the update). Mac: run \`digest update\`."
+          } > notes.md
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "WorkDigest $TAG" --notes-file notes.md \
+            artifacts/WorkDigest.apk artifacts/*.whl artifacts/install.sh artifacts/version.json
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Build the website
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          VERSION_JSON: ${{ github.workspace }}/artifacts/version.json
+        run: cd web && npm ci --no-audit --no-fund && npm run build:site
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx --yes vercel@62.0.0 deploy web/dist/site/browser --prod --yes --token "$VERCEL_TOKEN"

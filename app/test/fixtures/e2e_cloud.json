@@ -1,0 +1,705 @@
+{
+ "days": [
+  {
+   "work_date": "2026-10-24",
+   "counts": {
+    "sessions": 2,
+    "commits": 0
+   },
+   "user_id": "u-1"
+  }
+ ],
+ "digests": [
+  {
+   "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+   "work_date": "2026-10-24",
+   "origin": "generated",
+   "status": "sent_marked",
+   "template_version": "99f459747ceb",
+   "text": "Greetings Priya,\n\nDaily digest – Sat, 24 Oct 2026\nJira:\n- EIT-8403 – [title: confirm]\n  https://ei-study.atlassian.net/browse/EIT-8403\n\nProject: Platform Consolidation\nTeam members: [missing: who you worked with]\n\nIn short: [missing: In short]\nDay rating: [ask: rate your day 1 / 3 / 7 / 9]\n\n1. Done today\n   1. Testing\n      - unknown-repo vitest: 644/644 tests pass (at 22:19)\n\n2. Plan vs actual\n   [missing: no evidence captured for this section]\n\n3. Schedule\n   [missing: no evidence captured for this section]\n\n4. Blockers\n   [missing: no evidence captured for this section]\n\n5. Risks\n   [missing: no evidence captured for this section]\n\n6. Decisions made\n   [missing: no evidence captured for this section]\n\n7. Releases and deployment – None.\n\n8. PRs and review turnaround\n   [missing: no evidence captured for this section]\n\n9. Learnings\n   [missing: no evidence captured for this section]\n\n10. How I use AI tools and check quality\n   [missing: no evidence captured for this section]\n\n11. Plan for upcoming days\n   [missing: no evidence captured for this section]\n",
+   "structure": {
+    "closing": [],
+    "gaps": [
+     {
+      "kind": "input",
+      "message": "title for EIT-8403 unknown; confirm it (or sync Jira with `digest atlassian sync`)",
+      "ref": null,
+      "section": "header"
+     },
+     {
+      "kind": "input",
+      "message": "team members missing (set with `digest close --team`)",
+      "ref": null,
+      "section": "header"
+     },
+     {
+      "kind": "input",
+      "message": "day rating not given; it is never guessed (`digest close --rating 1|3|7|9`)",
+      "ref": null,
+      "section": "header"
+     },
+     {
+      "kind": "missing",
+      "message": "'Plan vs actual' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "plan_vs_actual"
+     },
+     {
+      "kind": "missing",
+      "message": "'Schedule' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "schedule"
+     },
+     {
+      "kind": "missing",
+      "message": "'Blockers' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "blockers"
+     },
+     {
+      "kind": "missing",
+      "message": "'Risks' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "risks"
+     },
+     {
+      "kind": "missing",
+      "message": "'Decisions made' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "decisions"
+     },
+     {
+      "kind": "input",
+      "message": "no deployment captured; confirm nothing was deployed today",
+      "ref": null,
+      "section": "releases"
+     },
+     {
+      "kind": "input",
+      "message": "PR links and turnaround need the Bitbucket token (`digest secrets set bitbucket`); add them or say why there is no PR",
+      "ref": null,
+      "section": "prs"
+     },
+     {
+      "kind": "missing",
+      "message": "'PRs and review turnaround' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "prs"
+     },
+     {
+      "kind": "missing",
+      "message": "'Learnings' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "learnings"
+     },
+     {
+      "kind": "missing",
+      "message": "'How I use AI tools and check quality' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "ai_tools"
+     },
+     {
+      "kind": "missing",
+      "message": "'Plan for upcoming days' has no content; write it or confirm 'None.'",
+      "ref": null,
+      "section": "plan_upcoming"
+     },
+     {
+      "kind": "rule",
+      "message": "Name the unit tests added, not just counts. → tests reported as counts only; name the unit tests added",
+      "ref": "R03-named-tests",
+      "section": null
+     },
+     {
+      "kind": "rule",
+      "message": "Include the atomic-commit check result. → no atomic-commit check result",
+      "ref": "R04-atomic-commit",
+      "section": null
+     },
+     {
+      "kind": "rule",
+      "message": "Include repo and branch links. → no repo/branch links",
+      "ref": "R05-repo-links",
+      "section": null
+     },
+     {
+      "kind": "rule",
+      "message": "Risks need an owner and a date; never write a bare 'None' after a risky change. → risks not written yet",
+      "ref": "R07-risk-owner-date",
+      "section": null
+     },
+     {
+      "kind": "rule",
+      "message": "Plan vs actual names the plan date and the day (day N of 5). → plan vs actual does not say 'day N of 5'",
+      "ref": "R09-plan-day",
+      "section": null
+     },
+     {
+      "kind": "real_action",
+      "message": "Every ticket worked on has a branch created from it and a meaningful Activity comment. (checked from Jira in Phase 3)",
+      "ref": "R11-ticket-hygiene",
+      "section": null
+     },
+     {
+      "kind": "real_action",
+      "message": "Only one ticket In Progress at a time; defects get a Jira Bug linked to the parent ticket, even if caught before release. (checked from Jira in Phase 3)",
+      "ref": "R12-one-in-progress",
+      "section": null
+     },
+     {
+      "kind": "rule",
+      "message": "Send before 21:00: the deadline passed",
+      "ref": "R10-send-time",
+      "section": null
+     }
+    ],
+    "header": {
+     "date_text": "Sat, 24 Oct 2026",
+     "greeting": "Greetings Priya,",
+     "in_short": [],
+     "jira": [
+      {
+       "key": "EIT-8403",
+       "title": null,
+       "url": "https://ei-study.atlassian.net/browse/EIT-8403"
+      }
+     ],
+     "links": [],
+     "project": "Platform Consolidation",
+     "rating": null,
+     "team_members": []
+    },
+    "provider": "none",
+    "sections": [
+     {
+      "inline": false,
+      "key": "done_today",
+      "number": 1,
+      "source": "mixed",
+      "statements": [
+       {
+        "children": [
+         {
+          "children": [],
+          "evidence_ids": [
+           "T1"
+          ],
+          "problems": [],
+          "text": "unknown-repo vitest: 644/644 tests pass (at 22:19)",
+          "verified": true
+         }
+        ],
+        "evidence_ids": [],
+        "problems": [],
+        "text": "Testing",
+        "verified": true
+       }
+      ],
+      "title": "Done today",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "plan_vs_actual",
+      "number": 2,
+      "source": "placeholder",
+      "statements": [],
+      "title": "Plan vs actual",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "schedule",
+      "number": 3,
+      "source": "placeholder",
+      "statements": [],
+      "title": "Schedule",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "blockers",
+      "number": 4,
+      "source": "placeholder",
+      "statements": [],
+      "title": "Blockers",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "risks",
+      "number": 5,
+      "source": "placeholder",
+      "statements": [],
+      "title": "Risks",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "decisions",
+      "number": 6,
+      "source": "placeholder",
+      "statements": [],
+      "title": "Decisions made",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": true,
+      "key": "releases",
+      "number": 7,
+      "source": "deterministic",
+      "statements": [
+       {
+        "children": [],
+        "evidence_ids": [],
+        "problems": [],
+        "text": "None.",
+        "verified": true
+       }
+      ],
+      "title": "Releases and deployment",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "prs",
+      "number": 8,
+      "source": "placeholder",
+      "statements": [],
+      "title": "PRs and review turnaround",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "learnings",
+      "number": 9,
+      "source": "placeholder",
+      "statements": [],
+      "title": "Learnings",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "ai_tools",
+      "number": 10,
+      "source": "placeholder",
+      "statements": [],
+      "title": "How I use AI tools and check quality",
+      "title_suffix": "",
+      "trailer": []
+     },
+     {
+      "inline": false,
+      "key": "plan_upcoming",
+      "number": 11,
+      "source": "placeholder",
+      "statements": [],
+      "title": "Plan for upcoming days",
+      "title_suffix": "",
+      "trailer": []
+     }
+    ],
+    "template_version": "99f459747ceb",
+    "work_date": "2026-10-24"
+   },
+   "gaps": [
+    {
+     "kind": "input",
+     "message": "title for EIT-8403 unknown; confirm it (or sync Jira with `digest atlassian sync`)",
+     "ref": null,
+     "section": "header"
+    },
+    {
+     "kind": "input",
+     "message": "team members missing (set with `digest close --team`)",
+     "ref": null,
+     "section": "header"
+    },
+    {
+     "kind": "input",
+     "message": "day rating not given; it is never guessed (`digest close --rating 1|3|7|9`)",
+     "ref": null,
+     "section": "header"
+    },
+    {
+     "kind": "missing",
+     "message": "'Plan vs actual' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "plan_vs_actual"
+    },
+    {
+     "kind": "missing",
+     "message": "'Schedule' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "schedule"
+    },
+    {
+     "kind": "missing",
+     "message": "'Blockers' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "blockers"
+    },
+    {
+     "kind": "missing",
+     "message": "'Risks' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "risks"
+    },
+    {
+     "kind": "missing",
+     "message": "'Decisions made' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "decisions"
+    },
+    {
+     "kind": "input",
+     "message": "no deployment captured; confirm nothing was deployed today",
+     "ref": null,
+     "section": "releases"
+    },
+    {
+     "kind": "input",
+     "message": "PR links and turnaround need the Bitbucket token (`digest secrets set bitbucket`); add them or say why there is no PR",
+     "ref": null,
+     "section": "prs"
+    },
+    {
+     "kind": "missing",
+     "message": "'PRs and review turnaround' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "prs"
+    },
+    {
+     "kind": "missing",
+     "message": "'Learnings' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "learnings"
+    },
+    {
+     "kind": "missing",
+     "message": "'How I use AI tools and check quality' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "ai_tools"
+    },
+    {
+     "kind": "missing",
+     "message": "'Plan for upcoming days' has no content; write it or confirm 'None.'",
+     "ref": null,
+     "section": "plan_upcoming"
+    },
+    {
+     "kind": "rule",
+     "message": "Name the unit tests added, not just counts. → tests reported as counts only; name the unit tests added",
+     "ref": "R03-named-tests",
+     "section": null
+    },
+    {
+     "kind": "rule",
+     "message": "Include the atomic-commit check result. → no atomic-commit check result",
+     "ref": "R04-atomic-commit",
+     "section": null
+    },
+    {
+     "kind": "rule",
+     "message": "Include repo and branch links. → no repo/branch links",
+     "ref": "R05-repo-links",
+     "section": null
+    },
+    {
+     "kind": "rule",
+     "message": "Risks need an owner and a date; never write a bare 'None' after a risky change. → risks not written yet",
+     "ref": "R07-risk-owner-date",
+     "section": null
+    },
+    {
+     "kind": "rule",
+     "message": "Plan vs actual names the plan date and the day (day N of 5). → plan vs actual does not say 'day N of 5'",
+     "ref": "R09-plan-day",
+     "section": null
+    },
+    {
+     "kind": "real_action",
+     "message": "Every ticket worked on has a branch created from it and a meaningful Activity comment. (checked from Jira in Phase 3)",
+     "ref": "R11-ticket-hygiene",
+     "section": null
+    },
+    {
+     "kind": "real_action",
+     "message": "Only one ticket In Progress at a time; defects get a Jira Bug linked to the parent ticket, even if caught before release. (checked from Jira in Phase 3)",
+     "ref": "R12-one-in-progress",
+     "section": null
+    },
+    {
+     "kind": "rule",
+     "message": "Send before 21:00: the deadline passed",
+     "ref": "R10-send-time",
+     "section": null
+    }
+   ],
+   "provider": "none",
+   "created_at": "2026-10-24T22:19:12.749284+05:30",
+   "user_id": "u-1"
+  }
+ ],
+ "digest_statements": [
+  {
+   "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+   "section_key": "done_today",
+   "idx": 0,
+   "text": "Testing",
+   "verified": true,
+   "evidence_ids": [],
+   "problems": [],
+   "user_id": "u-1"
+  },
+  {
+   "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+   "section_key": "done_today",
+   "idx": 1,
+   "text": "unknown-repo vitest: 644/644 tests pass (at 22:19)",
+   "verified": true,
+   "evidence_ids": [
+    "T1"
+   ],
+   "problems": [],
+   "user_id": "u-1"
+  },
+  {
+   "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+   "section_key": "releases",
+   "idx": 2,
+   "text": "None.",
+   "verified": true,
+   "evidence_ids": [],
+   "problems": [],
+   "user_id": "u-1"
+  }
+ ],
+ "evidence": [
+  {
+   "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+   "evidence_id": "K1",
+   "kind": "ticket",
+   "strength": "claim",
+   "text": "EIT-8403 – (title unknown); commits today: 0; prompt mentions: 2",
+   "refs": {
+    "key": "EIT-8403"
+   },
+   "user_id": "u-1"
+  },
+  {
+   "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+   "evidence_id": "S1",
+   "kind": "session",
+   "strength": "claim",
+   "text": "Claude Code session \"de:S-e2e\" 22:19-22:19, repos -, 1 prompts, 1 tool calls, 0 edits; tickets EIT-8403. tests: ? vitest: 644/644",
+   "refs": {
+    "session": "claude:S-e2e"
+   },
+   "user_id": "u-1"
+  },
+  {
+   "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+   "evidence_id": "S2",
+   "kind": "session",
+   "strength": "claim",
+   "text": "Cursor session \"or:C-e2e\" 22:19-22:19, repos -, 1 prompts, 0 tool calls, 0 edits; tickets EIT-8403",
+   "refs": {
+    "session": "cursor:C-e2e"
+   },
+   "user_id": "u-1"
+  },
+  {
+   "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+   "evidence_id": "T1",
+   "kind": "test_run",
+   "strength": "fact",
+   "text": "unknown-repo vitest: 644/644 tests passed at 22:19 (1 runs today); summary line: \"Tests  644 passed (644)\"",
+   "refs": {
+    "command": "npm test",
+    "summary_line": "Tests  644 passed (644)"
+   },
+   "user_id": "u-1"
+  }
+ ],
+ "notifications": [
+  {
+   "id": "7653dd6d-656b-4bc3-99d4-51cbf1a9d08e",
+   "status": "queued",
+   "updated_at": "2099-01-01T00:00:00+00:00",
+   "user_id": "u-1",
+   "kind": "draft_ready",
+   "title": "Draft ready – send before 9pm",
+   "body": "Sat 24 Oct: 17 gaps to confirm",
+   "payload": {
+    "digest_id": "4c8f1d7a46bfc6de04ed58ea",
+    "work_date": "2026-10-24"
+   }
+  }
+ ],
+ "asks": [],
+ "standing_rules": [
+  {
+   "rule_id": "R01-structure",
+   "text": "Follow the 11-point structure, including plan vs actual, releases, PR links and turnaround, and learnings.",
+   "check_kind": "section_present",
+   "check_params": {
+    "sections": [
+     "done_today",
+     "plan_vs_actual",
+     "schedule",
+     "blockers",
+     "risks",
+     "decisions",
+     "releases",
+     "prs",
+     "learnings",
+     "ai_tools",
+     "plan_upcoming"
+    ]
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R02-header",
+   "text": "Open with one line on the project and the people you work with; include the 'In short' line and a day rating (1/3/7/9).",
+   "check_kind": "header_present",
+   "check_params": {
+    "fields": [
+     "project",
+     "team members",
+     "in short",
+     "day rating"
+    ]
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R03-named-tests",
+   "text": "Name the unit tests added, not just counts.",
+   "check_kind": "named_tests",
+   "check_params": {},
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R04-atomic-commit",
+   "text": "Include the atomic-commit check result.",
+   "check_kind": "regex",
+   "check_params": {
+    "message": "no atomic-commit check result",
+    "pattern": "atomic[- ]commit check[^\\n\\[]*?(?:pass|fail|fix|split|clean|ok\\b|\\d)"
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R05-repo-links",
+   "text": "Include repo and branch links.",
+   "check_kind": "regex",
+   "check_params": {
+    "message": "no repo/branch links",
+    "pattern": "https://(?:bitbucket\\.org|github\\.com)/[^\\s]+/(?:commits/branch|branch|src)/"
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R06-rollout",
+   "text": "When migrations are involved, put rollout/rollback steps in deployment-instructions.md and say so.",
+   "check_kind": "regex",
+   "check_params": {
+    "message": "migration work without rollout/rollback steps or deployment-instructions.md",
+    "pattern": "(?i)rollback|roll back|deployment-instructions",
+    "trigger": "(?i)\\bmigrat|\\bDDL\\b|\\brenam|\\bdrop(?:ped)?\\b.*\\btable"
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R07-risk-owner-date",
+   "text": "Risks need an owner and a date; never write a bare 'None' after a risky change.",
+   "check_kind": "risk_owner_date",
+   "check_params": {
+    "risky": "(?i)\\bmigrat|\\brenam|\\bencrypt|\\bDDL\\b|\\bdrop|\\bcopied\\b|\\bdelet|\\bremoved?\\b.*\\btables?\\b"
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R08-plan-dates",
+   "text": "The plan for upcoming days has dates (and owners where possible).",
+   "check_kind": "plan_dates",
+   "check_params": {},
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R09-plan-day",
+   "text": "Plan vs actual names the plan date and the day (day N of 5).",
+   "check_kind": "regex",
+   "check_params": {
+    "message": "plan vs actual does not say 'day N of 5'",
+    "pattern": "(?i)day \\d of \\d",
+    "section": "plan_vs_actual"
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R10-send-time",
+   "text": "Send before 9pm.",
+   "check_kind": "manual",
+   "check_params": {
+    "deadline": "21:00"
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R11-ticket-hygiene",
+   "text": "Every ticket worked on has a branch created from it and a meaningful Activity comment.",
+   "check_kind": "manual",
+   "check_params": {
+    "needs_real_action": true,
+    "phase": 3
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  },
+  {
+   "rule_id": "R12-one-in-progress",
+   "text": "Only one ticket In Progress at a time; defects get a Jira Bug linked to the parent ticket, even if caught before release.",
+   "check_kind": "manual",
+   "check_params": {
+    "needs_real_action": true,
+    "phase": 3
+   },
+   "source": "seed",
+   "active": true,
+   "user_id": "u-1"
+  }
+ ]
+}

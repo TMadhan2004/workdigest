@@ -1,0 +1,88 @@
+Greetings Priya,
+
+Daily digest – Fri, 23 Oct 2026
+Jira:
+- EIT-9286 – Move SIS onboarding milestones and KDM stakeholder mapping usecases from Billing Service to Portal Service v4
+  https://ei-study.atlassian.net/browse/EIT-9286
+- EIT-9333 – Harden the Attempt Service automated tests and document every test case in an Excel sheet
+  https://ei-study.atlassian.net/browse/EIT-9333
+- EIT-9334 – Harden the Billing Service test suite and document every automated test case
+  https://ei-study.atlassian.net/browse/EIT-9334
+
+Project: Platform Consolidation 
+Team members: Rahul, Vikram, Meera
+
+In short: The two Billing use cases, SIS onboarding milestones and KDMs (key decision makers, including the contract signatory), now live in Portal Service v4. Code, OpenAPI, canon-data, the Portal migrator and the remote database 163 are all updated, and Billing no longer holds this data. Everything was tested end to end, through the APIs and in the real Portal UI with Playwright. All five repos are pushed as single-purpose commits. Separately, the Attempt and Billing test suites were hardened and every test case is documented in Excel; one or two rounds of refinement and verification remain on those. Nothing is deployed yet.
+
+1. Done today
+   1. EIT-9286 – Billing → Portal Service v4 (code)
+      - Portal now serves milestone settings, order milestones, completions, field values, events and milestone syncs, plus order KDMs and a new contact-roles resource (primary KDM / signatory, assigned KDM, primary contact). The URLs are unchanged and the responses use the Portal format.
+      - Billing: the milestone and KDM code, tables and migrator rules are removed. The API is now version 1.0.0.
+      - Gateway: these routes now go to Portal. Order create and order settings are split between Billing and Portal, and a retry queue covers Portal outages.
+      - Portal UI: KDMs are read and saved in the Portal format, with "changed by someone else" protection.
+      - canon-data: ownership of these resources and fields moved to Portal.
+      - Fixed two existing bugs instead of carrying them over: milestone field values were all saved against one form field, and the primary KDM was dropped when an order was created.
+   2. Review and fixes
+      - A full review across all repos found 15 issues, all fixed and tested. The most important: Portal's tenant-level access check was weaker than Billing's, a proposal save wiped the assigned KDM, and two simultaneous saves could create duplicate milestones.
+      - Portal now refuses KDMs who don't belong to the order's tenant. 4 legacy rows with another tenant's contact are set aside by the migrator.
+   3. Data migration (local and remote 163)
+      - Backed up both databases first.
+      - Portal: 226 order milestones, 1,278 KDMs and 949 roles migrated from legacy, and every set-aside row has a recorded reason. A re-run changes nothing.
+      - Billing: the old milestone tables and KDM rows are removed (DDL 00010). Before dropping, I checked that every Billing-only row was intentionally set aside, so no active KDM was lost.
+   4. Testing
+      - Live API test through the gateway: 20/20 checks passed.
+      - Playwright in the real UI: create proposal with KDMs, edit, two people editing at once, signatory on contract screens, and SIS screens all passed.
+   5. EIT-9333 / EIT-9334 – Test hardening (in progress)
+      - Attempt Service: weak tests strengthened against planted defects, all 519 test cases documented in Excel, Go suites added to the pipeline.
+      - Billing Service: tenant-isolation, repeat-request and invoice-cron tests added; real-PostgreSQL suites run in CI; all 722 test cases documented in Excel.
+      - Remaining: slight refinements and one to two rounds of verification.
+   6. Commits
+      - Made with the atomic-commit check skill; four commits that mixed changes were split first. Pushed:
+        portal-service-v4 (31), api-gateway (23), billing-service (14), portal-ui (8), canon-data (3).
+      - Atomic-commit check: 4 commits fixed.
+      ei-portalu-ui: https://bitbucket.org/ei-india-admin/portal-ui/commits/branch/migration
+      api-gateway: https://bitbucket.org/ei-india-admin/api-gateway/commits/branch/nav-aggregator-integration
+      canon-data: https://bitbucket.org/ei-india-admin/canon-data/commits/branch/update%2Fcanon-refresh
+      billing-service: https://bitbucket.org/ei-india-admin/billing-service/commits/branch/feat%2Fbilling-migrator
+      quiz-service: https://bitbucket.org/ei-india-admin/quiz-service/commits/branch/feat%2Fattempt-migrator 
+
+2. Plan vs actual
+   1. EIT-9286 → Done: code, review fixes, local and remote data, end-to-end testing. Only deployment is left.
+   2. EIT-9333 / EIT-9334 → Mostly done; refinement and verification rounds remain.
+
+3. Schedule
+   1. EIT-9286: on schedule.
+   2. EIT-9333 / EIT-9334: on schedule.
+
+4. Blockers
+   None.
+
+5. Risks
+   None.
+
+6. Decisions made
+   1. Same URLs in the Portal response format; Billing's milestone design is kept as its own tables in Portal.
+   2. Signatory, assigned KDM and primary contact become a Portal contact-roles resource. The gateway keeps the order settings API working by splitting and merging.
+   3. The subscription summary no longer includes KDM keys, which matches legacy.
+   4. KDMs from another tenant are refused by the API and set aside by the migrator.
+
+7. Releases and deployment – None.
+
+8. PRs and review turnaround
+   1. No PRs(As discussed with Rahul); work is on feature branches for Rahul's review: portal-service-v4 docs/openapi-descriptions, api-gateway nav-aggregator-integration, billing-service feat/billing-migrator, portal-ui migration, canon-data update/canon-refresh. Also these details are sent to him. 
+
+9. Learnings
+   1. A review that compares behaviour with the old service catches what tests miss. The weaker tenant-level access check passed every test.
+   2. Database links can push filters to the source and fail on legacy enum types. Run migrators on real legacy data, not only fixtures.
+
+10. How I use AI tools and check quality
+   1. Claude Code: parallel agents per repo for implementation, a six-way review and fixes; Playwright drove the real UI; ei-mcp-gateway for Jira.
+   2. Checks: Portal 1,096 unit and 155 integration tests; Billing 644 unit, 11 Postgres and 17 migrator tests; gateway and UI suites green (976+ UI specs); canon-data check passes. Every commit was built and tested on its own.
+
+11. Plan for upcoming days
+   1. EIT-9333 / EIT-9334: refinements, then one to two rounds of verification.
+   2. Review the Excel test case sheets with Rahul.
+   3. Staging: once Rahul gives access to a staging copy, run the migration scripts, point the services at that database and test portal-ui there. Fix any gaps or issues before moving to staging.
+   4. Integrate the the learning app service and MIRA; planning will be discussed later.
+
+And thanks for yesterday's review clarification from my side Activity comments have been added to both EIT-8403 and EIT-8383. Regarding the identity-service PR #312, the work was originally assigned to Vikram, but due to his absence, I picked it up and worked on it under EIT-6685. The approach we implemented was exploratory and doesn't seem to have been finalized yet. So, I believe the final decision on which PR should proceed should be made by Vikram and Rahul, aligning with Daniel if needed, before we move forward.

@@ -1,0 +1,480 @@
+
+Me:
+Greetings Priya,
+
+Daily digest – Mon, 19 Oct 2026
+Jira:
+- EIT-8371 – Fix database column names in Identity, Attempt, and Billing to match canon-data
+  https://ei-study.atlassian.net/browse/EIT-8371
+- EIT-8372 – Integrate utility-service with portal-ui
+  https://ei-study.atlassian.net/browse/EIT-8372
+
+In short: DB column names in Identity, Attempt and Billing now match canon-data. Portal UI now talks to utility-service through the gateway for translations and tenant-site files, and the main flows are tested. Also drafted an OpenAPI writing guide for MCP use.
+
+1. Done today
+   1. EIT-8371 – Database column renames to match canon-data
+      - Added forward migrations only. Old migrations were not changed.
+      - Identity: 36 columns renamed.
+      - Attempt: 9 columns renamed.
+      - Billing: 47 columns renamed.
+      - API / OpenAPI field names stay the same. Callers still use the old JSON names.
+      - SQL, seeds and DB docs now use the new column names.
+   2. EIT-8372 – Connect portal-ui to utility-service through api-gateway
+      - Translation management now uses `/api/v1/*` instead of ei-localization.
+      - Tenant-site contract upload and list now use `/api/v1/files`.
+      - UI models stay the same. A mapper converts the new responses.
+      - utility-service now returns the coverage stats and lookup value IDs the UI needs.
+      - Duplicate translation value now returns 409, not 500.
+      - Fixed two bugs found while testing:
+        - CSL order search by tenant name.
+        - False "1 Mismatch Found" in contract comparison (grade `5` vs `"Grade 5"`).
+   3. Testing for the utility-service work
+      - portal-ui: 966 / 966 tests pass; build passes.
+      - api-gateway: 297 / 297 tests pass.
+      - utility-service: build, vet and tests pass.
+      - Translation end-to-end through the gateway: 40 / 40 pass.
+      - Manual checks: tenant-site contract upload, CRM / Shiksha lead docs, and the main sales flows.
+   4. Created `openapi-spec-writing-guide.md` as a knowledge document for OpenAPI writing, to be used with an MCP. Will discuss this with Rahul.
+
+2. Schedule
+   1. On schedule: EIT-8371 database renames.
+   2. On schedule: EIT-8372 UI + utility-service integration and main testing.
+   3. Ahead: OpenAPI writing guide drafted for review with Rahul.
+
+3. Blockers
+   None
+
+4. Risks
+   None
+
+5. Decisions made
+   1. DB columns follow canon names. 
+   2. Mixed approach for response gaps: utility-service returns what legacy returned where the UI needs it; the UI handles page-size and category-filter limits.
+   3. One S3 bucket for now (`ei-mira-dev` locally). Files are stored in utility-service’s bucket.
+   4. Zoho and PDF services stay out of this work.
+
+6. Decisions pending
+   1. Rahul review of the OpenAPI writing guide before using it as MCP knowledge.
+
+7. How I use AI tools
+   1. ei-mcp-gateway: used to read EIT-8371 and EIT-8372 for the exact task scope and definition of done.
+   2. Cursor agent: used to wire UI routes, mappers, gateway file clients, and the coverage / lookup fixes in utility-service.
+   3. Started an OpenAPI writing guide so future MCP work follows one clear standard.
+
+8. How I check quality
+   1. Column-naming audits against canon-data for Identity, Attempt and Billing.
+   2. Automated suites: UI 966/966, gateway 297/297, utility-service go test, translation e2e 40/40.
+   3. Manual Portal checks for tenant-site contracts and CRM / Shiksha flows.
+   4. Bugs found in testing were fixed in the same work, not left for later.
+
+9. Plan for the next 5 days
+   1. Implement the use-case documents for the consolidated services.
+   2. Fix the DB migration scripts needed for those use-case changes.
+   3. Apply the matching client-side fixes for the same changes.
+   4. Test the client-side applications end to end.
+   5. Close gaps found in testing and sync with Rahul on the OpenAPI writing guide.
+   
+Reply:
+Greetings Arjun!
+
+Very good... this reads much easier now. Forward-only migrations for 92 column renames with the API names unchanged, 966/966 UI, 297/297 gateway and 40/40 translation tests, and the two bugs fixed in the same work... good discipline. Thanks for starting openapi-spec-writing-guide.md after my 16 Oct ask on ei-mcp-gateway skills.
+
+1. Add plan vs actual against Friday's five-day plan, which started with Utility Service end-to-end testing and the identity use cases.
+2. Add the PR links and how long each took to get approved or rejected (17 Oct ask).
+3. Risks says None after renaming 92 columns across three services. What is the rollout and rollback plan for QA and Staging, and is it in deployment-instructions.md?
+
+Following up on my 16 Oct ask... once Rahul reviews the guide, turn it into a skill that updates OpenAPI descriptions and the gateway wiring from the live service contracts. Build it on openapi-spec-writer, and use Apidog /apidog_contract_drift on utility-service to show where the contract and the code differ.
+
+Use Factory behind ei-mcp-gateway (https://docs.ei-poc.study/en-IN/mcp/welcome) on the work in hand. For each run, load the skill first, then its references, then the spec, then the code, and start in dry-run:
+• EIT-8371 (92 column renames): run /database_review on the forward migrations, then use deployment-patterns to write the rollout and rollback steps into deployment-instructions.md.
+• EIT-8372: run /microservice_review in dry-run on the utility-service changes before the PR, and /jira_to_production in plan mode with the key so the branch comes from the ticket.
+
+Do you need help getting Rahul's review on the guide?
+
+Please follow the daily digest structure I shared in the group every day, the 11-point checklist of 16 Oct plus the 17 Oct points 1 to 4... your 19 Oct digest misses plan vs actual (2), releases (7), learnings (9), PR turnaround (17 Oct point 1) and deployment-instructions.md (17 Oct point 4).
+
+On Jira... none of your tickets has a branch created from it or a meaningful comment, for example EIT-8371 and EIT-8372. Please also recheck CA-0214 and CA-0215, which don't open.
+
+On arrival... your average since 9 Oct is 09:31, and you were in by 9:00 on 0 of 6 office days. You are close. Please try to be in by 9am on office days so the scrum works face to face. On WFH days, join the call.
+
+
+Me:
+Greetings Priya,
+
+Daily digest – Wed, 21 Oct 2026
+Jira:
+- EIT-8403 – Move billing profiles and user credits usecases from Identity Service to Billing Service
+  https://ei-study.atlassian.net/browse/EIT-8403
+- EIT-8383 – Enhance the OpenAPI spec writer skill with lessons from the consolidated services' OpenAPI refinements
+  https://ei-study.atlassian.net/browse/EIT-8383
+Confluence: https://ei-study.atlassian.net/wiki/spaces/~712020ceae13b03d30455ebc4ce41736ab9dd0/pages/2303230002
+
+In short: billing profiles (GSTIN, TAN, card, billing name and address) and the per-user credit wallet moved from Identity Service to Billing Service. Code, OpenAPI, tests, the gateway, canon-data and the remote databases are updated, and account numbers are now encrypted at rest. Four repos are pushed. The portal UI change is ready but not committed. Nothing is deployed yet. Separately, the OpenAPI spec writer skill now carries the lessons from the OpenAPI refinements. It is pushed but not yet tried on a real spec.
+
+1. Done today
+   1. EIT-8403 – Moved billing details and user credits from Identity to Billing
+      - Billing now holds each tenant's account and billing details (GST, TAN, card, billing name and address) and each user's credit balance. Before, these lived in Identity.
+      - The account numbers are now stored encrypted. Before, they were stored as plain text.
+      - A tenant user can only see and change their own tenant's billing details. Our internal staff can see all tenants.
+      - Identity no longer has these features. Its old code, tables and documentation were removed.
+      - The gateway now sends these requests to Billing. When a user is deleted, their credits are also removed from Billing.
+      - The Portal app now reads and saves account details from Billing. If Billing is unavailable, it shows a warning instead of an empty screen.
+      - The shared data dictionary (canon-data) and the API documentation are updated to match.
+   2. Moved the data on the shared server
+      - Took backups first.
+      - Copied the 3 credit balances and their 3 history entries into Billing, and checked that the copies match exactly.
+      - Removed the old tables from Identity.
+      - The 2 account records in Identity were dummy test data, so we did not copy them.
+   3. Fixed existing problems found along the way
+      - Billing: cleaned up code-style and documentation errors, and raised test coverage above the required level.
+      - Identity: fixed all code-style warnings.
+      - Identity: fixed a real security bug. A one-time login code (OTP) could be used twice if two requests arrived at the same moment. It now works only once.
+   4. EIT-8383 – Updated open api spec writing skill in ei-factory-mcp
+      - The skill now checks the actual code before writing, follows each project's existing style, and applies the writing rules that is agreed on discussion with rahul.
+      - Implementation is done, but needs to test the updated skills with multiple models.
+
+2. Plan vs actual (against the 19 Oct five-day plan, day 3 of 5)
+   1. Implement the use-case documents for the consolidated services → Done for Identity UC-6 (billing profiles) and UC-7 (credit wallet).
+   2. Fix the DB migration scripts for those changes → Done: billing 00008 / 00009, identity 00006 / 00007, and the copy job. Applied locally and on remote.
+   3. Client-side fixes for the same changes → Done in the gateway and portal UI. UI not committed yet.
+   4. Test the client applications end to end → Partly: all automated suites pass. Manual contract-screen check against deployed services is still to do.
+   5. Close gaps and sync with Rahul on the OpenAPI guide → Guide applied to the EIT-8383 skill. 
+   Extra, not in the plan: the billing and identity lint/coverage/Spectral fixes, the OTP race fix, and the API catalog generator fix.
+
+3. Schedule
+   1. On schedule: EIT-8403 code, tests and remote DB migration.
+   2. Behind: portal UI commit and the manual end-to-end check (moved to tomorrow).
+   3. On schedule: EIT-8383 skill update; testing on a real spec is tomorrow.
+
+4. Blockers
+   None.
+
+5. Risks
+   1. Real account data is still only in legacy client-management (2,428 rows, 877 active, last changed 14 Oct). Identity never migrated it. Billing will show no account details for real tenants until a legacy copy is done (separate task). - This needs to be handled
+
+6. Decisions made
+   1. Encrypt GSTIN / TAN / card at rest in Billing and keep identity's hash for matching.
+
+7. Releases and deployment - None
+
+8. PRs and review turnaround
+   1. No PRs opened today. All work is pushed to feature branches. PR for EIT-8383 will be opened tomorrow after the skill test.
+   2. Turnaround: none to report today. From tomorrow, I'll track opened → approved/rejected time per PR.
+
+9. Learnings
+   1. Check what is actually in the database before planning a migration. Identity's credit and account tables only ever held seed rows. The real data is in legacy, which changes what "moving the data" means.
+   2. A flaky test can hide a real bug. The flaky OTP test was a real double-use race in production code.
+   3. Columns named *_encrypted were storing plain text in identity. Names prove nothing; the code does.
+   4. Canon drift can start on day one. billing_name and client_type were copied from legacy validators when canon was created and never matched the new schemas.
+
+10. How I use AI tools and check quality
+   1. ei-mcp-gateway: created EIT-8403 from my ticket template, wrote today's Confluence page, and read the 16 / 19 Oct pages.
+   2. Claude Code agent:
+      - Planned the move with a stop-and-review gate per section.
+      - Ran background agents for the coverage tests and the identity lint / OTP fix.
+      - Ran the remote DB steps with read-only checks before each change.
+   3. Quality checks:
+      - Unit tests: billing 644/644, gateway 316/316, UI 971/971, identity go test pass.
+      - Billing API matrix: 3,333/3,333 with nothing skipped.
+      - Postgres tests: 11/11 Postgres, 10/10 copy job.
+      - Checksums equal on the remote copy.
+      - canon-data validate + gate self-test.
+      - Spec description edits approved line by line before editing, following openapi-spec-writing-guide.md.
+
+11. Plan for the next 5 days
+   1. Test the portal-ui with the new updated usecase.
+   2. End-to-end check of the contract account-details flow and the credit routes.
+   3. Test the EIT-8383 skill on a real operation, open its PR, and get Rahul's review of the OpenAPI guide.
+   4. Plan the legacy tax_details → Billing copy as a new ticket.
+   
+   
+Reply:
+Hi Arjun,
+
+Finding that the flaky OTP test hid a real double-use race was excellent engineering.
+
+Bugs
+- That OTP fix is a security fix with no Jira bug. Without one, nobody can trace when the race was found, who verified it. Raise a bug with steps (two requests with the same OTP at the same moment), expected (one succeeds), actual (both succeed), the root cause and the fix.
+
+Tasks
+- EIT-8403 (https://ei-study.atlassian.net/browse/EIT-8403) has a 10,500-character description and a due date, but no comment on today's migration, the encryption change or the four pushed repos. Add a comment listing what moved, what was verified and what is pending.
+- EIT-8383 (https://ei-study.atlassian.net/browse/EIT-8383) is To Do, while your digest says the skill update is implemented and pushed. Move it to In Progress.
+
+PRs
+- Four repos are pushed with no PRs, so none of this has been reviewed. Keep the OTP fix in its own commit, apart from the lint and coverage fixes, so it can be cherry-picked if needed.
+
+Factory
+- Run the security-audit workflow on the Identity and Billing diffs. Ask it to check account-number encryption, the tenant-level access rule and the OTP fix.
+- Run /impact_change_evaluation on each diff before merge and note the test gaps.
+- Load the jira-bug-context skill to write up the OTP bug.
+- Before every PR, run the atomic-commit check skill I shared in the group today on your laptop.
+
+Digest
+- The legacy account-data risk ("This needs to be handled") names no owner or date. The five-day plan has no dates, and the atomic-commit result is missing.
+
+Attendance
+- You punched in at 9:03am today. Your 10-day average is 9:31am, after 9am on all 8 days you punched. A small shift gets you into the 9am scrum.
+
+For tomorrow, raise the OTP bug and open PRs for the four repos.
+
+Me:
+Greetings Priya,
+
+Thanks for the detailed review. Regarding PRs, the consolidated services (Billing, Identity, Gateway, and Portal UI changes) are being written from scratch, so there isn't yet a stable base branch to raise PRs against and merge into. We're keeping the work on feature branches, which Rahul reviews directly, and I'll share the branch list with him. Starting today, I'm running the atomic-commit check skill before every push. Today's work went in as nine single-purpose commits across three repos, each built and tested independently. Regarding bugs, I found and fixed the OTP double-use issue while working on another change in the new Identity Service. Since the code has never been deployed, no users or environments were affected; the issue was caught during development, before any release. I therefore didn't raise a separate Jira bug, as the root cause, fix, and new test are documented in the commit and test case TC-UN-9701.
+
+Daily digest – Thu, 22 Oct 2026
+Jira:
+- EIT-8403 – Move billing profiles and user credits usecases from Identity Service to Billing Service
+  https://ei-study.atlassian.net/browse/EIT-8403
+- EIT-8383 – OpenAPI spec writing skill enhancements based on the refinements of the consolidated services' OpenAPI specs
+  https://ei-study.atlassian.net/browse/EIT-8383
+Open api spec updated Skill test results: https://ei-study.atlassian.net/wiki/x/BAFTiQ
+
+In short: the real legacy account and credit data is now in Billing on the remote database 163. There are 2,428 billing profiles, every account number is encrypted, and all of them read back correctly. Billing now has one migrator that copies from the legacy databases and can be re-run safely to pick up later changes. I tested the Portal account-details flows end to end for one tenant, and they work. Testing found a real gateway bug: deleting a user did not remove their credits. It's fixed, and a review found the same bug in two Portal lead actions, which the same fix covers. All work is committed as single-purpose commits and pushed. Nothing is deployed yet. I also looked at whether the two Billing use cases should move to Portal Service v4: both should. Separately, the OpenAPI spec writer skill in ei-factory-mcp is updated with what we learned from refining the consolidated services' specs. In 8 test runs it clearly beat the old skill, and the PR is raised.
+
+1. Done today
+   1. EIT-8403 – Billing migrator: one migrator that copies from legacy
+      - Removed the separate "copy from Identity" job. Billing now has one command (npm run migrate:legacy). It reads the legacy client-management database (account details) and the legacy IAM database (credits), along with the order, payment and subscription data it already copied.
+      - It can be run any number of times. Each run picks up new or changed legacy rows, keeps the newest version, and never overwrites changes made in Billing.
+      - Account numbers (GST, TAN, card) are encrypted as they're copied. They never appear as plain text in Billing, the run reports or the "skipped rows" list.
+      - Group-level account records are stored as organisation-group records. Active and inactive records are both copied. Each user's credit history is replayed in order, so the history matches the balance.
+      - Fixed a bug during the run: legacy records with an empty status were being loaded as active (2,156 active against 877 in legacy). They now load as inactive, which matches what the legacy app shows.
+      - Fixed a small leak found in review: when a account record clashed with an existing one, the run report printed a fingerprint (hash) of the card. It now shows [hidden] with the row id.
+   2. Ran the migrator on the shared server
+      - Took a backup of the Billing database first.
+      - Loaded 2,428 billing profiles (877 active, 1,551 inactive; 59 of them are group-level), 1 credit wallet and its 37 history entries.
+      - Checked that every one of the 4,014 stored account numbers decrypts correctly, and that the counts match legacy.
+      - This replaces yesterday's Identity test rows with real data and closes yesterday's risk.
+   3. Tested the Portal app end to end (tenant 500119, order 9536)
+      - Viewing: the contract screen shows the tenant's existing account details from Billing.
+      - First save: with no account details on file, saving the contract creates one billing profile.
+      - Editing: saving TAN first, then card and GST, updates the same profile each time instead of creating duplicates. Signing the contract (Generate) also updated it correctly.
+      - Billing down: with Billing stopped, the screen shows a "could not load account details" warning and blocks saving, so empty fields can't wipe out real data.
+      - OMS: the Proposal Information pop-up shows the account details.
+      - CSL: after signing, the order card in CSL Order Approvals shows the account details. I also confirmed that the "All" filter there intentionally lists only signed, on-hold, confirmed and rejected orders.
+      - Access: a user from one tenant can't see or change another tenant's account details. This is blocked both in the app and through the API.
+      - Deleting a user: their credits are removed from Billing. This test found the gateway bug below.
+   4. Fixed a gateway bug during development: credits not removed when a user is deleted 
+      - When a user was deleted, the gateway asked Billing to remove their credits. The request was malformed: it claimed to carry data but carried none, and Billing rejected it. The failure was logged quietly, so nobody noticed. The automated tests didn't catch it because they use a fake Billing.
+      - Fixed it, made the error log say exactly why a call failed, and added a test. I checked the fix against the real services with a test user, and re-sent the clean-ups that had been queued while the bug was live.
+      - I then reviewed the gateway for the same problem. Two Portal lead actions had it too: removing duplicate "interested product" entries from a lead, and removing products from a lead stage. They had been failing silently, and the same fix covers them. No other calls are affected.
+      - Since the code has never been deployed, no users or environments were affected; the issue was caught during development, before any release hence bug tickets are not raised. 
+   5. Final review and commits
+      - Reviewed all of today's changes before committing. Two fixes came out of it (the card fingerprint above, and keeping the shared-server run output out of git)..
+      - Made the commits with the atomic-commit check skill: one purpose per commit, and each commit built and tested on its own. Pushed to the feature branches:
+        - billing-service (4): load legacy account and credit data; remove the old Identity copy job; hide account fingerprints in reports; ignore run-output folders.
+        - api-gateway (2): fix the empty DELETE request; clearer clean-up failure log.
+        - portal-ui (3): read organisations through the gateway; save account details to Billing; block saving when account details failed to load.
+      - Atomic-commit check: passed (9 commits, all single-purpose).
+   6. Analysis: moving two Billing use cases to Portal Service v4
+      - SIS onboarding milestones: valid to move. Billing makes no price, invoice, payment, order-status or entitlement decision with them. Portal already has the matching pieces (onboardings, milestone catalogue, forms, history), so today two services track the same onboarding steps. The order dates Portal needs stay in Billing.
+      - Key decision makers (KDMs): valid to move. Billing only stores them. A KDM is a role on a CRM contact, so it should move with or after the contacts move from Identity to Portal (being done in parallel by another person). Creating logins for KDMs stays with Identity.
+      - Open points: whether the contract signatory stays on the Billing order, and updating the canon note that currently keeps milestone configs in Billing.
+   7. EIT-8383 – OpenAPI spec writer skill in ei-factory-mcp
+      - Updated the openapi-spec-writer skill with the rules we learned while refining the Identity, Attempt and Notification specs:
+        - The agent reads the route, handler, service and SQL before writing, and documents only behaviour it verified, with exact error codes.
+        - Descriptions explain behaviour (filters, ordering, defaults, empty results, errors) instead of repeating the parameter list.
+        - An existing spec keeps its own format and conventions; the enterprise defaults apply only to new specs.
+        - Added one writing standard, edit guardrails and a final report that lists what could not be verified.
+      - Added a new reference for Optimisation sections: how to verify each speed claim and how to write known limitations. Aligned the other reference files so they no longer contradict each other.
+      - Testing: 8 runs on a copy of quiz-service with its spec removed. Each run used its own branch, in Claude Code (Claude Opus 5.5) and Cursor (Auto), comparing the old skill with the updated one:
+        - Writing a spec from scratch (runs 1 to 4).
+        - Refining the old skill's weakest output (runs 5 and 6).
+        - Adding Optimisation sections (run 7).
+        - A final check of the refinements (run 8).
+        Each output was checked against the service code, lint and the original hand-refined spec.
+      - Results: the old skill documented 1 error code in Cursor and wrongly claimed a bearer-token check the service doesn't do. The updated skill documented 67 to 68 error codes, with 0 lint errors from scratch (old skill: 8 to 19).
+      - Applied five refinements found in testing, and confirmed four of them in run 8. One, not guessing which client calls an operation, still fails with the weaker Cursor Auto model.
+      - Made the commits with the atomic-commit check skill (2 single-purpose commits), pushed to branch EIT-8383 and raised the PR into master. The repo's quality checks pass, and search accuracy matches master.
+
+2. Plan vs actual (against the 19 Oct five-day plan, day 4 of 5)
+   1. Implement the consolidated-service use cases → Done for UC-6 and UC-7, now including real legacy data.
+   2. Fix the DB migration scripts → Done. One re-runnable legacy migrator, run on the shared server.
+   3. Client-side fixes → Done. Portal UI committed and pushed. The gateway bug found in testing is fixed.
+   4. Test the client apps end to end → Done locally (scenarios above). Checking real tenants on the shared environment waits for deployment.
+   5. OpenAPI guide / EIT-8383 → Done. Skill updated, tested in 8 runs, PR raised.
+   Extra, not in the plan: The migrator status fix, and the analysis of moving Billing use cases to Portal.
+
+3. Schedule
+   1. On schedule: EIT-8403 code, data and local end-to-end testing.
+   2. EIT-8383: on schedule. Waiting for PR review.
+
+4. Blockers
+   None.
+
+5. Risks
+   None
+   
+6. Decisions made
+   1. One legacy migrator for everything (the separate Identity copy job is removed).
+   2. Legacy account records with an empty status are treated as inactive, matching the legacy app.
+   3. Group-level account records become organisation-group records. All statuses are copied, and credit history is replayed.
+   4. Code is reviewed on feature branches by Rahul instead of through PRs, until the consolidated services have a stable base branch.
+
+7. Releases and deployment - None
+
+8. PRs and review turnaround
+   1. No PRs for EIT-8403. Work is on feature branches for Rahul's review: billing-service feat/billing-migrator, api-gateway nav-aggregator-integration, portal-ui migration, identity-service data-migration-rebased, canon-data update/canon-refresh.
+   2. EIT-8383: PR raised today, ei-factory-mcp EIT-8383 → master. https://bitbucket.org/ei-india-admin/ei-factory-mcp/pull-requests/41
+
+9. Learnings
+   1. Fake services in tests can hide real integration bugs. The empty-DELETE bug passed every automated test and was found only by testing against the real services.
+   2. "Our UI doesn't call it" doesn't mean "unused". Other clients may depend on an API, so moved APIs keep their contract.
+   3. An empty value in legacy data can carry meaning. An empty status meant "inactive" in the legacy app, and loading it as active would have shown 1,279 wrong profiles.
+   4. Error messages and reports can leak sensitive data. Even a fingerprint of a card shouldn't be printed.
+   5. A skill is only as good as the model following it. Claude Opus 5.5 followed the updated skill closely, while Cursor Auto followed the structure but skipped some rules (in one run it rewrote descriptions with a script). Rules that can be checked hold up better than rules that rely on judgement.
+
+10. How I use AI tools and check quality
+   1. Claude Code agent:
+      - Ran parallel review agents on the migrator and UI changes.
+      - Split the work into single-purpose commits with the atomic-commit check, testing each commit on its own before pushing.
+      - Analysed the Billing → Portal use cases against the code in all repos.
+   2. Quality checks today:
+      - Billing: unit tests 650/650; migrator 25/25 unit and 17/17 integration (each commit also tested on its own).
+      - Gateway: 318/318.
+      - Portal UI: type checks pass; billing, CRM and OMS specs 51/51.
+      - Shared-server copy: counts match legacy, and all 4,014 account numbers decrypt.
+   3. ei-factory-mcp:
+      - Tested the updated skill as a local MCP server (factory-local) against the deployed skill served through ei-mcp-gateway, using Claude Code and Cursor.
+      - Reviewed every run against the code and recorded it in Confluence.
+      - Checks: npm run quality:check passes; search eval unchanged from master; each commit tested on its own.
+
+11. Plan for upcoming days
+   1. Billing → Portal Service v4. Get decisions on the open points, then create the Jira ticket:
+      - Whether milestone configs move (this changes the canon note).
+      - Whether the contract signatory stays on the Billing order.
+      - Timing of the KDM move with whoever is moving contacts.
+   2. Write the move plan with review stops per section, covering Billing, gateway, Portal Service v4, UI, canon-data, OpenAPI, tests and the migrator. Start with milestones, because they don't depend on the contacts move.
+   3. Follow-ups for the move
+      - Keep the same API behaviour for other clients; the gateway re-routes the paths, so nothing is deleted outright.
+      - Milestone syncs need a new endpoint in Portal.
+      - The "onboarding context" order facts stay in Billing, minus the hard-coded milestones_ready flag.
+      - Fix two known defects instead of carrying them over: field values saved against a hard-coded form field, and the primary KDM being dropped when an order is created.
+      - KDMs move with or after the contacts move.
+      
+Reply:
+Hi Arjun,
+
+Thank you for explaining the PRs. I understand the consolidated services are being written from scratch and Rahul reviews the feature branches. Even so, please work on short-lived branches off each feature branch and raise regular PRs into it, so each change gets its own review, pipeline run and history. Please share the branch list with Rahul as you said, and tell me when it is done.
+
+Finding the empty DELETE bug by testing against real services, then searching the gateway for the same mistake, was very good work. I accept that the OTP and gateway issues were caught before release. Still, please log each as a Jira Bug linked to EIT-8403, with the root cause and fix, so we can see where defects come from.
+
+Your learning about fake services hiding integration bugs is important. Martin Fowler's Contract Tests fill this gap. A contract test is a small test that checks your fake still behaves like the real Billing service. Please add one for the credits call. The re-runnable migrator also follows his Parallel Change idea for the Billing to Portal move, so the old and new paths can live together until clients switch.
+
+On https://ei-study.atlassian.net/browse/EIT-8403 there were no Activity comments on 21-Oct-2026, and https://ei-study.atlassian.net/browse/EIT-8383 was behind the work. Please add a short comment on what moved today, and fill due date and parent on both. Both are due 23-Oct-2026 and in Review. Your identity-service PR https://bitbucket.org/ei-india-admin/identity-service/pull-requests/312 has been open since 05-Oct-2026 with no approval, and Vikram's #319 now covers the same ticket. Please agree with him and Daniel or Rahul which one ships. Raise the Portal v4 ticket once the open points are decided, with who decides and by when.
+
+EIT-1115 and EIT-2269, from June, and EIT-6698 are all In Progress. Please keep only one In Progress at a time and move the others to the right status.
+
+Your work on the openapi-spec-writer skill is the Factory contribution I hope for. Do you have a crew of at least 10 agents managing your tasks, time, meetings, quality and builds? I'd like a demo, given how you used parallel review agents. Please also check that the .gitignore in billing-service covers all run output, and share the repo links in your next digest.
+
+From the next digest, open with one line on the project and the people you work with. If you are away or have an exception to the three office days, tell me the date you'll be back. You punched in at 9:09am today and your 10-day average is 9:31am. On office days the day starts before 8:59am, with no exception.
+
+Best Regards
+Priya Perumal
+
+
+Me:
+Greetings Priya,
+
+Daily digest – Fri, 23 Oct 2026
+Jira:
+- EIT-9286 – Move SIS onboarding milestones and KDM stakeholder mapping usecases from Billing Service to Portal Service v4
+  https://ei-study.atlassian.net/browse/EIT-9286
+- EIT-9333 – Harden the Attempt Service automated tests and document every test case in an Excel sheet
+  https://ei-study.atlassian.net/browse/EIT-9333
+- EIT-9334 – Harden the Billing Service test suite and document every automated test case
+  https://ei-study.atlassian.net/browse/EIT-9334
+
+Project: Platform Consolidation 
+Team members: Rahul, Vikram, Meera
+
+In short: The two Billing use cases, SIS onboarding milestones and KDMs (key decision makers, including the contract signatory), now live in Portal Service v4. Code, OpenAPI, canon-data, the Portal migrator and the remote database 163 are all updated, and Billing no longer holds this data. Everything was tested end to end, through the APIs and in the real Portal UI with Playwright. All five repos are pushed as single-purpose commits. Separately, the Attempt and Billing test suites were hardened and every test case is documented in Excel; one or two rounds of refinement and verification remain on those. Nothing is deployed yet.
+
+1. Done today
+   1. EIT-9286 – Billing → Portal Service v4 (code)
+      - Portal now serves milestone settings, order milestones, completions, field values, events and milestone syncs, plus order KDMs and a new contact-roles resource (primary KDM / signatory, assigned KDM, primary contact). The URLs are unchanged and the responses use the Portal format.
+      - Billing: the milestone and KDM code, tables and migrator rules are removed. The API is now version 1.0.0.
+      - Gateway: these routes now go to Portal. Order create and order settings are split between Billing and Portal, and a retry queue covers Portal outages.
+      - Portal UI: KDMs are read and saved in the Portal format, with "changed by someone else" protection.
+      - canon-data: ownership of these resources and fields moved to Portal.
+      - Fixed two existing bugs instead of carrying them over: milestone field values were all saved against one form field, and the primary KDM was dropped when an order was created.
+   2. Review and fixes
+      - A full review across all repos found 15 issues, all fixed and tested. The most important: Portal's tenant-level access check was weaker than Billing's, a proposal save wiped the assigned KDM, and two simultaneous saves could create duplicate milestones.
+      - Portal now refuses KDMs who don't belong to the order's tenant. 4 legacy rows with another tenant's contact are set aside by the migrator.
+   3. Data migration (local and remote 163)
+      - Backed up both databases first.
+      - Portal: 226 order milestones, 1,278 KDMs and 949 roles migrated from legacy, and every set-aside row has a recorded reason. A re-run changes nothing.
+      - Billing: the old milestone tables and KDM rows are removed (DDL 00010). Before dropping, I checked that every Billing-only row was intentionally set aside, so no active KDM was lost.
+   4. Testing
+      - Live API test through the gateway: 20/20 checks passed.
+      - Playwright in the real UI: create proposal with KDMs, edit, two people editing at once, signatory on contract screens, and SIS screens all passed.
+   5. EIT-9333 / EIT-9334 – Test hardening (in progress)
+      - Attempt Service: weak tests strengthened against planted defects, all 519 test cases documented in Excel, Go suites added to the pipeline.
+      - Billing Service: tenant-isolation, repeat-request and invoice-cron tests added; real-PostgreSQL suites run in CI; all 722 test cases documented in Excel.
+      - Remaining: slight refinements and one to two rounds of verification.
+   6. Commits
+      - Made with the atomic-commit check skill; four commits that mixed changes were split first. Pushed:
+        portal-service-v4 (31), api-gateway (23), billing-service (14), portal-ui (8), canon-data (3).
+      - Atomic-commit check: 4 commits fixed.
+      ei-portalu-ui: https://bitbucket.org/ei-india-admin/portal-ui/commits/branch/migration
+      api-gateway: https://bitbucket.org/ei-india-admin/api-gateway/commits/branch/nav-aggregator-integration
+      canon-data: https://bitbucket.org/ei-india-admin/canon-data/commits/branch/update%2Fcanon-refresh
+      billing-service: https://bitbucket.org/ei-india-admin/billing-service/commits/branch/feat%2Fbilling-migrator
+      quiz-service: https://bitbucket.org/ei-india-admin/quiz-service/commits/branch/feat%2Fattempt-migrator 
+
+2. Plan vs actual
+   1. EIT-9286 → Done: code, review fixes, local and remote data, end-to-end testing. Only deployment is left.
+   2. EIT-9333 / EIT-9334 → Mostly done; refinement and verification rounds remain.
+
+3. Schedule
+   1. EIT-9286: on schedule.
+   2. EIT-9333 / EIT-9334: on schedule.
+
+4. Blockers
+   None.
+
+5. Risks
+   None.
+
+6. Decisions made
+   1. Same URLs in the Portal response format; Billing's milestone design is kept as its own tables in Portal.
+   2. Signatory, assigned KDM and primary contact become a Portal contact-roles resource. The gateway keeps the order settings API working by splitting and merging.
+   3. The subscription summary no longer includes KDM keys, which matches legacy.
+   4. KDMs from another tenant are refused by the API and set aside by the migrator.
+
+7. Releases and deployment – None.
+
+8. PRs and review turnaround
+   1. No PRs(As discussed with Rahul); work is on feature branches for Rahul's review: portal-service-v4 docs/openapi-descriptions, api-gateway nav-aggregator-integration, billing-service feat/billing-migrator, portal-ui migration, canon-data update/canon-refresh. Also these details are sent to him. 
+
+9. Learnings
+   1. A review that compares behaviour with the old service catches what tests miss. The weaker tenant-level access check passed every test.
+   2. Database links can push filters to the source and fail on legacy enum types. Run migrators on real legacy data, not only fixtures.
+
+10. How I use AI tools and check quality
+   1. Claude Code: parallel agents per repo for implementation, a six-way review and fixes; Playwright drove the real UI; ei-mcp-gateway for Jira.
+   2. Checks: Portal 1,096 unit and 155 integration tests; Billing 644 unit, 11 Postgres and 17 migrator tests; gateway and UI suites green (976+ UI specs); canon-data check passes. Every commit was built and tested on its own.
+
+11. Plan for upcoming days
+   1. EIT-9333 / EIT-9334: refinements, then one to two rounds of verification.
+   2. Review the Excel test case sheets with Rahul.
+   3. Staging: once Rahul gives access to a staging copy, run the migration scripts, point the services at that database and test portal-ui there. Fix any gaps or issues before moving to staging.
+   4. Integrate the the learning app service and MIRA; planning will be discussed later.
+
+And thanks for yesterday's review clarification from my side Activity comments have been added to both EIT-8403 and EIT-8383. Regarding the identity-service PR #312, the work was originally assigned to Vikram, but due to his absence, I picked it up and worked on it under EIT-6685. The approach we implemented was exploratory and doesn't seem to have been finalized yet. So, I believe the final decision on which PR should proceed should be made by Vikram and Rahul, aligning with Daniel if needed, before we move forward.
+
+Reply:
+Hi Arjun,
+
+This digest acts on most of what we discussed this week. The comments on https://ei-study.atlassian.net/browse/EIT-8403 and https://ei-study.atlassian.net/browse/EIT-8383, the branch links for all five repos, the atomic-commit check with four commits split, and the "In short" line at the top are all in. Your migration on https://ei-study.atlassian.net/browse/EIT-9286 is strong work. Reviewing it against Billing's behaviour caught the weaker tenant-level check. Would the contract test for the credits call that I suggested yesterday have caught it as well?
+
+I understand Rahul agreed to feature-branch reviews for now. With 31 commits on portal-service-v4 alone, how will he review it in pieces? Short-lived PRs into each feature branch could make that easier for him. Leaving the identity-service #312 call to Vikram and Rahul was right, since they own it.
+
+Two asks from the day before yesterday are still open. The OTP and empty-DELETE issues are not yet logged as Jira Bugs, and five tickets sit In Progress, EIT-9333, EIT-9334, EIT-6698, EIT-2269 and EIT-1115, the last two untouched since June. Which one is truly active? Logging the bugs and moving the rest to their right status whenever you can would tidy the board.
+
+Your test counts are already thorough. Will you keep naming the unit tests you add? A rating for your day alongside the "In short" line, 1, 3, 7 or 9, where 1 means very tough and 9 super fantastic, would help me too. Today's came around 9:15pm, so a send before 9pm would let me reply earlier.
+
+You were in at 8:53am today, ahead of the 8:59am mark. I'd still like the agent-crew demo, given how you ran parallel review agents. Rahul can carry any thoughts you have on the digest or the consolidation work.
+
+Best Regards
+Priya Perumal

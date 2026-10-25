@@ -1,0 +1,73 @@
+Greetings Priya,
+
+Daily digest – Mon, 19 Oct 2026
+Jira:
+- EIT-8371 – Fix database column names in Identity, Attempt, and Billing to match canon-data
+  https://ei-study.atlassian.net/browse/EIT-8371
+- EIT-8372 – Integrate utility-service with portal-ui
+  https://ei-study.atlassian.net/browse/EIT-8372
+
+In short: DB column names in Identity, Attempt and Billing now match canon-data. Portal UI now talks to utility-service through the gateway for translations and tenant-site files, and the main flows are tested. Also drafted an OpenAPI writing guide for MCP use.
+
+1. Done today
+   1. EIT-8371 – Database column renames to match canon-data
+      - Added forward migrations only. Old migrations were not changed.
+      - Identity: 36 columns renamed.
+      - Attempt: 9 columns renamed.
+      - Billing: 47 columns renamed.
+      - API / OpenAPI field names stay the same. Callers still use the old JSON names.
+      - SQL, seeds and DB docs now use the new column names.
+   2. EIT-8372 – Connect portal-ui to utility-service through api-gateway
+      - Translation management now uses `/api/v1/*` instead of ei-localization.
+      - Tenant-site contract upload and list now use `/api/v1/files`.
+      - UI models stay the same. A mapper converts the new responses.
+      - utility-service now returns the coverage stats and lookup value IDs the UI needs.
+      - Duplicate translation value now returns 409, not 500.
+      - Fixed two bugs found while testing:
+        - CSL order search by tenant name.
+        - False "1 Mismatch Found" in contract comparison (grade `5` vs `"Grade 5"`).
+   3. Testing for the utility-service work
+      - portal-ui: 966 / 966 tests pass; build passes.
+      - api-gateway: 297 / 297 tests pass.
+      - utility-service: build, vet and tests pass.
+      - Translation end-to-end through the gateway: 40 / 40 pass.
+      - Manual checks: tenant-site contract upload, CRM / Shiksha lead docs, and the main sales flows.
+   4. Created `openapi-spec-writing-guide.md` as a knowledge document for OpenAPI writing, to be used with an MCP. Will discuss this with Rahul.
+
+2. Schedule
+   1. On schedule: EIT-8371 database renames.
+   2. On schedule: EIT-8372 UI + utility-service integration and main testing.
+   3. Ahead: OpenAPI writing guide drafted for review with Rahul.
+
+3. Blockers
+   None
+
+4. Risks
+   None
+
+5. Decisions made
+   1. DB columns follow canon names. 
+   2. Mixed approach for response gaps: utility-service returns what legacy returned where the UI needs it; the UI handles page-size and category-filter limits.
+   3. One S3 bucket for now (`ei-mira-dev` locally). Files are stored in utility-service’s bucket.
+   4. Zoho and PDF services stay out of this work.
+
+6. Decisions pending
+   1. Rahul review of the OpenAPI writing guide before using it as MCP knowledge.
+
+7. How I use AI tools
+   1. ei-mcp-gateway: used to read EIT-8371 and EIT-8372 for the exact task scope and definition of done.
+   2. Cursor agent: used to wire UI routes, mappers, gateway file clients, and the coverage / lookup fixes in utility-service.
+   3. Started an OpenAPI writing guide so future MCP work follows one clear standard.
+
+8. How I check quality
+   1. Column-naming audits against canon-data for Identity, Attempt and Billing.
+   2. Automated suites: UI 966/966, gateway 297/297, utility-service go test, translation e2e 40/40.
+   3. Manual Portal checks for tenant-site contracts and CRM / Shiksha flows.
+   4. Bugs found in testing were fixed in the same work, not left for later.
+
+9. Plan for the next 5 days
+   1. Implement the use-case documents for the consolidated services.
+   2. Fix the DB migration scripts needed for those use-case changes.
+   3. Apply the matching client-side fixes for the same changes.
+   4. Test the client-side applications end to end.
+   5. Close gaps found in testing and sync with Rahul on the OpenAPI writing guide.

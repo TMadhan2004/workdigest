@@ -1,0 +1,27 @@
+Hi Arjun,
+
+Finding that the flaky OTP test hid a real double-use race was excellent engineering.
+
+Bugs
+- That OTP fix is a security fix with no Jira bug. Without one, nobody can trace when the race was found, who verified it. Raise a bug with steps (two requests with the same OTP at the same moment), expected (one succeeds), actual (both succeed), the root cause and the fix.
+
+Tasks
+- EIT-8403 (https://ei-study.atlassian.net/browse/EIT-8403) has a 10,500-character description and a due date, but no comment on today's migration, the encryption change or the four pushed repos. Add a comment listing what moved, what was verified and what is pending.
+- EIT-8383 (https://ei-study.atlassian.net/browse/EIT-8383) is To Do, while your digest says the skill update is implemented and pushed. Move it to In Progress.
+
+PRs
+- Four repos are pushed with no PRs, so none of this has been reviewed. Keep the OTP fix in its own commit, apart from the lint and coverage fixes, so it can be cherry-picked if needed.
+
+Factory
+- Run the security-audit workflow on the Identity and Billing diffs. Ask it to check account-number encryption, the tenant-level access rule and the OTP fix.
+- Run /impact_change_evaluation on each diff before merge and note the test gaps.
+- Load the jira-bug-context skill to write up the OTP bug.
+- Before every PR, run the atomic-commit check skill I shared in the group today on your laptop.
+
+Digest
+- The legacy account-data risk ("This needs to be handled") names no owner or date. The five-day plan has no dates, and the atomic-commit result is missing.
+
+Attendance
+- You punched in at 9:03am today. Your 10-day average is 9:31am, after 9am on all 8 days you punched. A small shift gets you into the 9am scrum.
+
+For tomorrow, raise the OTP bug and open PRs for the four repos.

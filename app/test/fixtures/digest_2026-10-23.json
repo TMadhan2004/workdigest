@@ -1,0 +1,1928 @@
+{
+ "digest_id": "65cad06c9f6a8689a45550a1",
+ "work_date": "2026-10-23",
+ "origin": "generated",
+ "status": "draft",
+ "template_version": "99f459747ceb",
+ "text": "Greetings Priya,\n\nDaily digest – Fri, 23 Oct 2026\nJira:\n- EIT-9286 – Move SIS onboarding milestones and KDM stakeholder mapping usecases from Billing Service to Portal Service v4\n  https://ei-study.atlassian.net/browse/EIT-9286\n- EIT-8383 – Enhance the OpenAPI spec writer skill with lessons from the consolidated services' OpenAPI refinements\n  https://ei-study.atlassian.net/browse/EIT-8383\n- EIT-8403 – Move billing profiles and user credits usecases from Identity Service to Billing Service\n  https://ei-study.atlassian.net/browse/EIT-8403\n- EIT-9333 – Harden the Attempt Service automated tests and document every test case in an Excel sheet\n  https://ei-study.atlassian.net/browse/EIT-9333\n- EIT-9334 – Harden the Billing Service test suite and document every automated test case\n  https://ei-study.atlassian.net/browse/EIT-9334\n\nProject: Platform Consolidation\nTeam members: [missing: who you worked with]\n\nIn short: Moved SIS onboarding milestones and KDM stakeholder mapping from Billing to Portal Service v4 across portal, billing, gateway, portal-ui and canon-data. Suites passed: portal-service-v4 1096/1096, billing 714/714, gateway 1205/1205, portal-ui 999/999. Quiz-service and billing test-hardening commits landed on their feature branches and were pushed. Nothing in today's evidence was deployed. EIT-9286 is in Review; EIT-9333 and EIT-9334 are In Progress; EIT-8403 and EIT-8383 stayed in Review with no new commits.\nDay rating: [ask: rate your day 1 / 3 / 7 / 9]\n\n1. Done today\n   1. EIT-9286 – Move SIS onboarding milestones and KDM stakeholder mapping to Portal Service v4\n      - Removed the SIS milestone and KDM families from billing, dropped milestone tables and KDM rows from the schema, and left those loads to the portal migrator.\n      - Added portal migration 00010 for milestones and KDM, catalogue and APIs for order milestones, KDM contacts and contact roles, and published OpenAPI for them.\n      - Portal migrator now loads legacy SIS milestones and KDM contacts/roles from ordermanagement and usermanagement, and is documented as re-runnable with remotion carry-over.\n      - Gateway routes milestone and KDM resources to portal-service-v4, writes order-create KDMs with a replay queue, composes configurations and milestones_ready, and purges portal data after a billing order purge.\n      - Portal UI reads and saves order KDM contacts in the portal format, keeps user-only KDMs by identity user id, and warns when the gateway saved the order but not its signatory.\n      - Canon-data moved SIS contract milestones and order KDM contacts into the portal catalog and aligned milestone units with the portal API.\n      - Verified with suite runs: portal-service-v4 1096/1096, billing 714/714, gateway 1205/1205, portal-ui 999/999.\n      - Pushed on docs/openapi-descriptions, feat/billing-migrator, nav-aggregator-integration, migration and update/canon-refresh; no PR for these branches appears in today's evidence.\n      - Jira moved To Do → In Progress → Review; due date set to 2026-10-27.\n   2. EIT-9333 – Harden Attempt Service automated tests and document every test case\n      - Stored quiz-service ids as uuid, strengthened weak tests, rejected parent attempt cycles, set aside legacy level logs with equal old and new levels, and ran Go unit and integration tests in Bitbucket Pipelines.\n      - Typed quiz-service ids as uuid in the attempt catalog in canon-data.\n      - go test: 8/8 packages passed.\n      - Jira moved To Do → In Progress; due date set to 2026-10-27.\n      - Excel documentation of every automated test case is still to confirm; no sheet artifact appears in the facts.\n   3. EIT-9334 – Harden the Billing Service test suite and document every automated test case\n      - Scoped Idempotency-Key replays to the first request, added a five-field cron schedule matcher, cluster-wide job lock and invoice raise ledger, and raise-once first-installment Zoho invoicing.\n      - Added Postgres-backed tests for the invoice cron lock and ledger, and ran the Postgres and migrator suites in CI.\n      - jest: 714/714 tests passed.\n      - Jira moved To Do → In Progress; due date set to 2026-10-27.\n      - Excel documentation attach to Jira is still open; the agent session reported the gateway could not read the local workbook.\n   4. Testing\n      - quiz-service go: 8/8 packages pass (at 15:11)\n      - billing-service jest: 714/714 tests pass (at 20:32)\n      - api-gateway jest: 1205/1205 tests pass (at 12:41)\n      - portal-ui karma: 999/999 tests pass (at 14:31)\n      - portal-service-v4 jest: 1096/1096 tests pass (at 14:38)\n      - unknown-repo go: 3/3 tests pass (at 16:21)\n      - unknown-repo jest: 1217/1217 tests pass (at 14:56)\n      - unknown-repo playwright: 6/10 tests pass (2 failed, 2 skipped at 17:19)\n   5. Commits\n      - Atomic-commit check: [missing: result of the atomic-commit check skill]\n      - quiz-service (5): https://bitbucket.org/ei-india-admin/quiz-service/commits/branch/feat%2Fattempt-migrator\n      - canon-data (4): https://bitbucket.org/ei-india-admin/canon-data/commits/branch/update%2Fcanon-refresh\n      - billing-service (24): https://bitbucket.org/ei-india-admin/billing-service/commits/branch/feat%2Fbilling-migrator\n      - api-gateway (24): https://bitbucket.org/ei-india-admin/api-gateway/commits/branch/nav-aggregator-integration\n      - portal-ui (8): https://bitbucket.org/ei-india-admin/portal-ui/commits/branch/migration\n      - portal-service-v4 (33): https://bitbucket.org/ei-india-admin/portal-service-v4/commits/branch/docs%2Fopenapi-descriptions\n\n2. Plan vs actual (against the 19 Oct five-day plan, day 5 of 5)\n   1. Implement the use-case documents for the consolidated services → Partly: portal OpenAPI and use-case docs for milestones, KDM contacts and contact roles were published and documented; broader consolidated-service use-case work beyond this move is not evidenced as newly finished today.\n   2. Fix the DB migration scripts needed for those use-case changes → Done: migration 00010 for milestones and KDM, billing schema drops, and portal migrator stages for legacy SIS milestones and KDMs landed and were pushed.\n   3. Apply the matching client-side fixes for the same changes → Done: api-gateway routes and composition for milestones/KDM, and portal-ui KDM read/save flows, were committed and pushed.\n   4. Test the client-side applications end to end → Partly: unit suites passed (portal-ui 999/999, gateway 1205/1205, portal-service-v4 1096/1096, billing 714/714); a playwright run was 6/10 passed with 2 failed and 2 skipped, so full E2E for the move is not closed from facts alone.\n   5. Close gaps found in testing and sync with Rahul on the OpenAPI writing guide → Partly: many gap-fix commits landed on the move branches; no fact shows a Rahul sync on the guide today.\n   Extra, not in the plan: Quiz-service and billing test hardening (EIT-9333, EIT-9334), including billing invoice-cron lock/ledger work and CI for Postgres/migrator suites.\n\n3. Schedule\n   1. On schedule: EIT-9286 in Review, due 2026-10-27.\n   2. On schedule: EIT-9333 and EIT-9334 In Progress, due 2026-10-27.\n   3. Behind: EIT-8403 due 2026-10-23, still Review, no commits today; migration comment posted, deployment still to confirm.\n   4. Behind: EIT-8383 due 2026-10-23, still Review, no commits today; skill-update comment posted.\n\n4. Blockers\n   1. Pushed EIT-9286 work has no PR in today's evidence, so review has not started on those branches.\n   2. EIT-9334 Excel sheet was not attached to Jira; agent session reported the gateway could not read the local file.\n\n5. Risks\n   1. Milestone/KDM schema drops, migration 00010 and legacy data copies are pushed but not deployed — owner me, check Mon 26 Oct.\n   2. Large multi-repo move sits on long feature branches without PRs, so review and rollback path for QA/Staging are unclear — owner me, Mon 26 Oct.\n   3. Playwright run ended 6/10 passed with 2 failed and 2 skipped — owner me, recheck Mon 26 Oct.\n   4. First remote run of the new Postgres and migrator CI step may fail on pipeline/Docker setup rather than tests — owner me, check Mon 26 Oct.\n\n6. Decisions made\n   1. Moved both SIS milestones and KDM use cases to portal-service-v4 and left billing without those families.\n   2. Portal owns the legacy migrator stages for milestones and KDMs rather than billing.\n   3. Quiz-service ids are stored and typed as uuid, with non-uuid rejection implied by the hardening commits.\n\n7. Releases and deployment – None.\n\n8. PRs and review turnaround\n   1. quiz-service PR #3 \"EIT-495 part 1 : Repo scaffolding, shared infrastructure, and OpenAPI common specifications\" EIT-495-part-1-foundation → development, OPEN, opened 28 May 15:18; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/3\n   2. quiz-service PR #4 \"EIT-495 (Part 2/5): pedagogy BC vertical slice + shared port interfaces\" EIT-495-part-2-pedagogy → EIT-495-part-1-foundation, OPEN, opened 28 May 15:20; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/4\n   3. quiz-service PR #5 \"EIT-495 (Part 3/5): contentattempt BC vertical slice\" EIT-495-part-3-contentattempt → EIT-495-part-2-pedagogy, OPEN, opened 28 May 15:23; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/5\n   4. quiz-service PR #6 \"EIT-495 (Part 4/5): application BC sources + top-level router\" EIT-495-part-4-application-sources → EIT-495-part-3-contentattempt, OPEN, opened 28 May 15:26; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/6\n   5. quiz-service PR #7 \"EIT-495 (Part 5/5): application BC tests + per-BC mocks\" EIT-495-part-5-application-tests → EIT-495-part-4-application-sources, OPEN, opened 28 May 15:28; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/7\n   6. identity-service PR #312 \"feat: Add browser-close logout type\" EIT-6685 → master, OPEN, opened 05 Oct 14:57; no approval yet, open for 19d 5h – https://bitbucket.org/ei-india-admin/identity-service/pull-requests/312\n   7. Branches with today's commits and no PR:\n      - quiz-service feat/attempt-migrator – https://bitbucket.org/ei-india-admin/quiz-service/commits/branch/feat%2Fattempt-migrator\n      - canon-data update/canon-refresh – https://bitbucket.org/ei-india-admin/canon-data/commits/branch/update%2Fcanon-refresh\n      - billing-service feat/billing-migrator – https://bitbucket.org/ei-india-admin/billing-service/commits/branch/feat%2Fbilling-migrator\n      - api-gateway nav-aggregator-integration – https://bitbucket.org/ei-india-admin/api-gateway/commits/branch/nav-aggregator-integration\n      - portal-ui migration – https://bitbucket.org/ei-india-admin/portal-ui/commits/branch/migration\n      - portal-service-v4 docs/openapi-descriptions – https://bitbucket.org/ei-india-admin/portal-service-v4/commits/branch/docs%2Fopenapi-descriptions\n\n9. Learnings\n   1. Quiz-service hardening had to add uuid id storage and parent-cycle rejection after weak tests were strengthened.\n   2. Billing invoice cron needed a cluster-wide lock and raise-once ledger before it was safe to schedule.\n   3. ei-mcp-gateway could not attach a local Mac Excel workbook to Jira from the remote gateway.\n\n10. How I use AI tools and check quality\n   1. Claude Code drove the EIT-9286 move across portal, billing, gateway, portal-ui and canon-data; a second session hardened quiz-service tests; a third rebased and pushed billing test/cron hardening.\n   2. Checks: quiz-service go 8/8 packages; billing jest 714/714; gateway jest 1205/1205; portal-ui karma 999/999; portal-service-v4 jest 1096/1096; playwright 6/10 passed (2 failed, 2 skipped).\n\n11. Plan for upcoming days\n   1. Mon 26 Oct: Raise short-lived PRs from the pushed EIT-9286 branches for Rahul review (owner: me).\n   2. Mon 26 Oct: Leave only one of EIT-9333 / EIT-9334 In Progress; finish Excel docs and attach or link the sheets (owner: me).\n   3. Mon 26 Oct: Recheck playwright failures and confirm deployment/rollback notes before any QA push of the milestone/KDM move (owner: me).\n   4. Tue 27 Oct: EIT-9286 due — close review comments and agree ship path with Daniel or Rahul (owner: me).\n   5. Tue 27 Oct: EIT-9333 and EIT-9334 due — complete hardening verification rounds (owner: me).\n   6. Wed 28 Oct: Clear EIT-8403 deployment pending items and log linked Bugs for the credits defects (owner: me).\n\nI did not cut short-lived PRs off the feature branches today; the move stayed on docs/openapi-descriptions, feat/billing-migrator, nav-aggregator-integration, migration, update/canon-refresh and feat/attempt-migrator, and I have not confirmed sharing that branch list with Rahul.\n\nI have not logged separate Jira Bugs under EIT-8403, and today's facts do not show a new credits-call contract test.\n\nI posted the EIT-8403 migration comment and set due dates on EIT-9286, EIT-9333 and EIT-9334; parent fields, which design ships with Daniel or Rahul, and a separate Portal v4 decision ticket are still open.\n\nI currently have both EIT-9333 and EIT-9334 In Progress, which breaks your one-In-Progress rule — I will correct that.\n\nI do not have a crew of ten agents managing tasks; a demo of the parallel review setup is not done; I have no evidence I checked billing-service .gitignore today, and I will open the next digest with the project and people line.\n\nStill open from earlier asks: rollout/rollback in deployment-instructions.md after the renames, CA-0214/CA-0215, utility-service dry-run reviews and Apidog drift, OTP bug ticket, security-audit on Identity/Billing, and Factory/skill load order on those runs.\n",
+ "structure": {
+  "closing": [
+   {
+    "children": [],
+    "evidence_ids": [
+     "M1",
+     "M2",
+     "C66",
+     "C10",
+     "C34",
+     "C58",
+     "C6",
+     "C1"
+    ],
+    "problems": [],
+    "text": "I did not cut short-lived PRs off the feature branches today; the move stayed on docs/openapi-descriptions, feat/billing-migrator, nav-aggregator-integration, migration, update/canon-refresh and feat/attempt-migrator, and I have not confirmed sharing that branch list with Rahul.",
+    "verified": true
+   },
+   {
+    "children": [],
+    "evidence_ids": [
+     "M3",
+     "M4",
+     "K3"
+    ],
+    "problems": [],
+    "text": "I have not logged separate Jira Bugs under EIT-8403, and today's facts do not show a new credits-call contract test.",
+    "verified": true
+   },
+   {
+    "children": [],
+    "evidence_ids": [
+     "M5",
+     "M6",
+     "M7",
+     "J3",
+     "J1",
+     "J6",
+     "J8"
+    ],
+    "problems": [],
+    "text": "I posted the EIT-8403 migration comment and set due dates on EIT-9286, EIT-9333 and EIT-9334; parent fields, which design ships with Daniel or Rahul, and a separate Portal v4 decision ticket are still open.",
+    "verified": true
+   },
+   {
+    "children": [],
+    "evidence_ids": [
+     "M8",
+     "J7",
+     "J9"
+    ],
+    "problems": [],
+    "text": "I currently have both EIT-9333 and EIT-9334 In Progress, which breaks your one-In-Progress rule — I will correct that.",
+    "verified": true
+   },
+   {
+    "children": [],
+    "evidence_ids": [
+     "M9",
+     "M10",
+     "M11",
+     "M12",
+     "S1",
+     "S3",
+     "S4"
+    ],
+    "problems": [],
+    "text": "I do not have a crew of ten agents managing tasks; a demo of the parallel review setup is not done; I have no evidence I checked billing-service .gitignore today, and I will open the next digest with the project and people line.",
+    "verified": true
+   },
+   {
+    "children": [],
+    "evidence_ids": [
+     "A3",
+     "A4",
+     "A6",
+     "A9",
+     "A10",
+     "A11",
+     "A13",
+     "A14"
+    ],
+    "problems": [],
+    "text": "Still open from earlier asks: rollout/rollback in deployment-instructions.md after the renames, CA-0214/CA-0215, utility-service dry-run reviews and Apidog drift, OTP bug ticket, security-audit on Identity/Billing, and Factory/skill load order on those runs.",
+    "verified": true
+   }
+  ],
+  "gaps": [
+   {
+    "kind": "input",
+    "message": "CA-0102 was only mentioned in passing; add it to the Jira list if you worked on it",
+    "ref": null,
+    "section": "header"
+   },
+   {
+    "kind": "input",
+    "message": "EIT-8321 was only mentioned in passing; add it to the Jira list if you worked on it",
+    "ref": null,
+    "section": "header"
+   },
+   {
+    "kind": "input",
+    "message": "team members missing (set with `digest close --team`)",
+    "ref": null,
+    "section": "header"
+   },
+   {
+    "kind": "input",
+    "message": "day rating not given; it is never guessed (`digest close --rating 1|3|7|9`)",
+    "ref": null,
+    "section": "header"
+   },
+   {
+    "kind": "rule",
+    "message": "Name the unit tests added, not just counts. → tests reported as counts only; name the unit tests added",
+    "ref": "R03-named-tests",
+    "section": null
+   },
+   {
+    "kind": "rule",
+    "message": "Include the atomic-commit check result. → no atomic-commit check result",
+    "ref": "R04-atomic-commit",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Add plan vs actual against Friday's five-day plan, which started with Utility Service end-to-end testing and t",
+    "ref": "24995c29485ad92d",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Add the PR links and how long each took to get approved or rejected (17 Oct ask).",
+    "ref": "2c71bedc7c3d393c",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "answered in the closing, but needs a real action: Please also recheck CA-0214 and CA-0215, which don't open. (close with `digest asks set 599c32 done --evidence …`)",
+    "ref": "599c328002f40bea",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Following up on my 16 Oct ask... once Rahul reviews the guide, turn it into a skill that updates OpenAPI d",
+    "ref": "65b1218e000513a2",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Do you need help getting Rahul's review on the guide?",
+    "ref": "8af4b56a8e7f98d8",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Use Factory behind ei-mcp-gateway (https://docs.ei-poc.study/en-IN/mcp/welcome) on the work in hand.",
+    "ref": "99d8aabe4f3e565f",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "answered in the closing, but needs a real action: EIT-8372: run /microservice_review in dry-run on the utility-service changes before the PR, and /jira_to_produ (close with `digest asks set af1de8 done --evidence …`)",
+    "ref": "af1de8d00fff40ee",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "answered in the closing, but needs a real action: For each run, load the skill first, then its references, then the spec, then the code, and start in dry-run: (close with `digest asks set d4234b done --evidence …`)",
+    "ref": "d4234b31203b8df9",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "answered in the closing, but needs a real action: EIT-8371 (92 column renames): run /database_review on the forward migrations, then use deployment-patterns to  (close with `digest asks set f5b7da done --evidence …`)",
+    "ref": "f5b7dabd81dab959",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing (raised 2x): Four repos are pushed with no PRs, so none of this has been reviewed. Keep the OTP fix in its own commit, apar",
+    "ref": "320a9f5ba06c6d63",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "answered in the closing, but needs a real action: Run the security-audit workflow on the Identity and Billing diffs. Ask it to check account-number encryption, the (close with `digest asks set 539106 done --evidence …`)",
+    "ref": "53910655c5215d5f",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "answered in the closing, but needs a real action (raised 3x): That OTP fix is a security fix with no Jira bug. Without one, nobody can trace when the race was found, who ve (close with `digest asks set 7046e1 done --evidence …`)",
+    "ref": "7046e1da942d9d3d",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "needs a real action (raised 2x): EIT-8403 (https://ei-study.atlassian.net/browse/EIT-8403) has a 10,500-character description and a due date, b (close with `digest asks set 7948b6 done --evidence …`)",
+    "ref": "7948b68b3592b90a",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "needs a real action: EIT-8383 (https://ei-study.atlassian.net/browse/EIT-8383) is To Do, while your digest says the skill update is (close with `digest asks set ebb923 done --evidence …`)",
+    "ref": "ebb92386dd3436ce",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "needs a real action: Please agree with him and Daniel or Rahul which one ships. (close with `digest asks set 5883a1 done --evidence …`)",
+    "ref": "5883a19538b9bbe6",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Please add one for the credits call.",
+    "ref": "66d24b1562c413a7",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "needs a real action: Please share the branch list with Rahul as you said, and tell me when it is done. (close with `digest asks set 83d78e done --evidence …`)",
+    "ref": "83d78e6baabb65fa",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Do you have a crew of at least 10 agents managing your tasks, time, meetings, quality and builds?",
+    "ref": "aa177a19e63a37dc",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "needs a real action: Even so, please work on short-lived branches off each feature branch and raise regular PRs into it, so each ch (close with `digest asks set d6ec2b done --evidence …`)",
+    "ref": "d6ec2b3af0e02414",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "needs a real action: Raise the Portal v4 ticket once the open points are decided, with who decides and by when. (close with `digest asks set d755b1 done --evidence …`)",
+    "ref": "d755b134cc384919",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "needs a real action (raised 2x): I'd like a demo, given how you used parallel review agents. (close with `digest asks set e4765d done --evidence …`)",
+    "ref": "e4765d70100d66d6",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "needs a real action: Please also check that the .gitignore in billing-service covers all run output, and share the repo links in y (close with `digest asks set fd5ccc done --evidence …`)",
+    "ref": "fd5ccca445718a9e",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Would the contract test for the credits call that I suggested yesterday have caught it as well?",
+    "ref": "900a0dcfe6b09e63",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Will you keep naming the unit tests you add?",
+    "ref": "a267cb0b13fa535b",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: With 31 commits on portal-service-v4 alone, how will he review it in pieces?",
+    "ref": "cc2f7c98de0e65e5",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Logging the bugs and moving the rest to their right status whenever you can would tidy the board.",
+    "ref": "e7564d68554cd426",
+    "section": null
+   },
+   {
+    "kind": "ask",
+    "message": "not answered in the closing: Which one is truly active?",
+    "ref": "fad65133d313a898",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-9286 has no parent in Jira; fill parent",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-9286 has no Activity comment from you today; add what moved, what was verified, what is pending",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-8383 has no branch created from it (name a branch after the key)",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-8383 has no parent in Jira; fill parent",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-8403 has no branch created from it (name a branch after the key)",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-8403 has no parent in Jira; fill parent",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-9333 has no branch created from it (name a branch after the key)",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-9333 has no parent in Jira; fill parent",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-9333 has no Activity comment from you today; add what moved, what was verified, what is pending",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-9334 has no branch created from it (name a branch after the key)",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-9334 has no parent in Jira; fill parent",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "EIT-9334 has no Activity comment from you today; add what moved, what was verified, what is pending",
+    "ref": "R11-ticket-hygiene",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "27 tickets are In Progress: EIT-1115 (In Progress), EIT-1125 (Review), EIT-1126 (Review), EIT-1277 (In Testing), EIT-1981 (Review), EIT-2256 (Review), EIT-2263 (Review), EIT-2269 (In Progress), EIT-370 (Review), EIT-4373 (Review), EIT-4908 (Review), EIT-495 (Review), EIT-6698 (In Progress), EIT-6699 (Review), EIT-6775 (Review), EIT-6821 (Review), EIT-7916 (Review), EIT-8321 (Review), EIT-8366 (Review), EIT-8370 (Review), EIT-8371 (Review), EIT-8372 (Review), EIT-8383 (Review), EIT-8403 (Review), EIT-9286 (Review), EIT-9333 (In Progress), EIT-9334 (In Progress); keep one and move the others",
+    "ref": "R12-one-in-progress",
+    "section": null
+   },
+   {
+    "kind": "real_action",
+    "message": "CA-0102 does not open in Jira (missing or no access); check the key",
+    "ref": "jira-missing",
+    "section": null
+   }
+  ],
+  "header": {
+   "date_text": "Fri, 23 Oct 2026",
+   "greeting": "Greetings Priya,",
+   "in_short": [
+    {
+     "children": [],
+     "evidence_ids": [
+      "C6",
+      "C7",
+      "C10",
+      "C11",
+      "C34",
+      "C58",
+      "C66",
+      "C70"
+     ],
+     "problems": [],
+     "text": "Moved SIS onboarding milestones and KDM stakeholder mapping from Billing to Portal Service v4 across portal, billing, gateway, portal-ui and canon-data.",
+     "verified": true
+    },
+    {
+     "children": [],
+     "evidence_ids": [
+      "T5",
+      "T2",
+      "T3",
+      "T4"
+     ],
+     "problems": [],
+     "text": "Suites passed: portal-service-v4 1096/1096, billing 714/714, gateway 1205/1205, portal-ui 999/999.",
+     "verified": true
+    },
+    {
+     "children": [],
+     "evidence_ids": [
+      "C1",
+      "C2",
+      "C5",
+      "C25",
+      "C32",
+      "C33"
+     ],
+     "problems": [],
+     "text": "Quiz-service and billing test-hardening commits landed on their feature branches and were pushed.",
+     "verified": true
+    },
+    {
+     "children": [],
+     "evidence_ids": [
+      "C10",
+      "C66",
+      "C34"
+     ],
+     "problems": [],
+     "text": "Nothing in today's evidence was deployed.",
+     "verified": true
+    },
+    {
+     "children": [],
+     "evidence_ids": [
+      "J5",
+      "J7",
+      "J9",
+      "K2",
+      "K3"
+     ],
+     "problems": [],
+     "text": "EIT-9286 is in Review; EIT-9333 and EIT-9334 are In Progress; EIT-8403 and EIT-8383 stayed in Review with no new commits.",
+     "verified": true
+    }
+   ],
+   "jira": [
+    {
+     "key": "EIT-9286",
+     "title": "Move SIS onboarding milestones and KDM stakeholder mapping usecases from Billing Service to Portal Service v4",
+     "url": "https://ei-study.atlassian.net/browse/EIT-9286"
+    },
+    {
+     "key": "EIT-8383",
+     "title": "Enhance the OpenAPI spec writer skill with lessons from the consolidated services' OpenAPI refinements",
+     "url": "https://ei-study.atlassian.net/browse/EIT-8383"
+    },
+    {
+     "key": "EIT-8403",
+     "title": "Move billing profiles and user credits usecases from Identity Service to Billing Service",
+     "url": "https://ei-study.atlassian.net/browse/EIT-8403"
+    },
+    {
+     "key": "EIT-9333",
+     "title": "Harden the Attempt Service automated tests and document every test case in an Excel sheet",
+     "url": "https://ei-study.atlassian.net/browse/EIT-9333"
+    },
+    {
+     "key": "EIT-9334",
+     "title": "Harden the Billing Service test suite and document every automated test case",
+     "url": "https://ei-study.atlassian.net/browse/EIT-9334"
+    }
+   ],
+   "links": [],
+   "project": "Platform Consolidation",
+   "rating": null,
+   "team_members": []
+  },
+  "provider": "cursor_cli",
+  "sections": [
+   {
+    "inline": false,
+    "key": "done_today",
+    "number": 1,
+    "source": "mixed",
+    "statements": [
+     {
+      "children": [
+       {
+        "children": [],
+        "evidence_ids": [
+         "C10",
+         "C11",
+         "C13",
+         "C14"
+        ],
+        "problems": [],
+        "text": "Removed the SIS milestone and KDM families from billing, dropped milestone tables and KDM rows from the schema, and left those loads to the portal migrator.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C66",
+         "C67",
+         "C68",
+         "C70",
+         "C72"
+        ],
+        "problems": [],
+        "text": "Added portal migration 00010 for milestones and KDM, catalogue and APIs for order milestones, KDM contacts and contact roles, and published OpenAPI for them.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C76",
+         "C78",
+         "C79",
+         "C80",
+         "C95"
+        ],
+        "problems": [],
+        "text": "Portal migrator now loads legacy SIS milestones and KDM contacts/roles from ordermanagement and usermanagement, and is documented as re-runnable with remotion carry-over.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C34",
+         "C35",
+         "C36",
+         "C38",
+         "C39",
+         "C40"
+        ],
+        "problems": [],
+        "text": "Gateway routes milestone and KDM resources to portal-service-v4, writes order-create KDMs with a replay queue, composes configurations and milestones_ready, and purges portal data after a billing order purge.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C58",
+         "C59",
+         "C63",
+         "C65"
+        ],
+        "problems": [],
+        "text": "Portal UI reads and saves order KDM contacts in the portal format, keeps user-only KDMs by identity user id, and warns when the gateway saved the order but not its signatory.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C6",
+         "C7",
+         "C8"
+        ],
+        "problems": [],
+        "text": "Canon-data moved SIS contract milestones and order KDM contacts into the portal catalog and aligned milestone units with the portal API.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T5",
+         "T2",
+         "T3",
+         "T4"
+        ],
+        "problems": [],
+        "text": "Verified with suite runs: portal-service-v4 1096/1096, billing 714/714, gateway 1205/1205, portal-ui 999/999.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C66",
+         "C10",
+         "C34",
+         "C58",
+         "C6"
+        ],
+        "problems": [],
+        "text": "Pushed on docs/openapi-descriptions, feat/billing-migrator, nav-aggregator-integration, migration and update/canon-refresh; no PR for these branches appears in today's evidence.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "J1",
+         "J2",
+         "J5"
+        ],
+        "problems": [],
+        "text": "Jira moved To Do → In Progress → Review; due date set to 2026-10-27.",
+        "verified": true
+       }
+      ],
+      "evidence_ids": [
+       "K1",
+       "C10",
+       "C70"
+      ],
+      "problems": [],
+      "text": "EIT-9286 – Move SIS onboarding milestones and KDM stakeholder mapping to Portal Service v4",
+      "verified": true
+     },
+     {
+      "children": [
+       {
+        "children": [],
+        "evidence_ids": [
+         "C1",
+         "C2",
+         "C3",
+         "C4",
+         "C5"
+        ],
+        "problems": [],
+        "text": "Stored quiz-service ids as uuid, strengthened weak tests, rejected parent attempt cycles, set aside legacy level logs with equal old and new levels, and ran Go unit and integration tests in Bitbucket Pipelines.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C9"
+        ],
+        "problems": [],
+        "text": "Typed quiz-service ids as uuid in the attempt catalog in canon-data.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T1"
+        ],
+        "problems": [],
+        "text": "go test: 8/8 packages passed.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "J6",
+         "J7"
+        ],
+        "problems": [],
+        "text": "Jira moved To Do → In Progress; due date set to 2026-10-27.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "K4",
+         "S3"
+        ],
+        "problems": [],
+        "text": "Excel documentation of every automated test case is still to confirm; no sheet artifact appears in the facts.",
+        "verified": true
+       }
+      ],
+      "evidence_ids": [
+       "K4",
+       "C2",
+       "J7"
+      ],
+      "problems": [],
+      "text": "EIT-9333 – Harden Attempt Service automated tests and document every test case",
+      "verified": true
+     },
+     {
+      "children": [
+       {
+        "children": [],
+        "evidence_ids": [
+         "C25",
+         "C26",
+         "C29",
+         "C31"
+        ],
+        "problems": [],
+        "text": "Scoped Idempotency-Key replays to the first request, added a five-field cron schedule matcher, cluster-wide job lock and invoice raise ledger, and raise-once first-installment Zoho invoicing.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C32",
+         "C33"
+        ],
+        "problems": [],
+        "text": "Added Postgres-backed tests for the invoice cron lock and ledger, and ran the Postgres and migrator suites in CI.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T2"
+        ],
+        "problems": [],
+        "text": "jest: 714/714 tests passed.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "J8",
+         "J9"
+        ],
+        "problems": [],
+        "text": "Jira moved To Do → In Progress; due date set to 2026-10-27.",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "K5",
+         "S4"
+        ],
+        "problems": [],
+        "text": "Excel documentation attach to Jira is still open; the agent session reported the gateway could not read the local workbook.",
+        "verified": true
+       }
+      ],
+      "evidence_ids": [
+       "K5",
+       "C32",
+       "J9"
+      ],
+      "problems": [],
+      "text": "EIT-9334 – Harden the Billing Service test suite and document every automated test case",
+      "verified": true
+     },
+     {
+      "children": [
+       {
+        "children": [],
+        "evidence_ids": [
+         "T1"
+        ],
+        "problems": [],
+        "text": "quiz-service go: 8/8 packages pass (at 15:11)",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T2"
+        ],
+        "problems": [],
+        "text": "billing-service jest: 714/714 tests pass (at 20:32)",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T3"
+        ],
+        "problems": [],
+        "text": "api-gateway jest: 1205/1205 tests pass (at 12:41)",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T4"
+        ],
+        "problems": [],
+        "text": "portal-ui karma: 999/999 tests pass (at 14:31)",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T5"
+        ],
+        "problems": [],
+        "text": "portal-service-v4 jest: 1096/1096 tests pass (at 14:38)",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T6"
+        ],
+        "problems": [],
+        "text": "unknown-repo go: 3/3 tests pass (at 16:21)",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T7"
+        ],
+        "problems": [],
+        "text": "unknown-repo jest: 1217/1217 tests pass (at 14:56)",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "T8"
+        ],
+        "problems": [],
+        "text": "unknown-repo playwright: 6/10 tests pass (2 failed, 2 skipped at 17:19)",
+        "verified": true
+       }
+      ],
+      "evidence_ids": [],
+      "problems": [],
+      "text": "Testing",
+      "verified": true
+     },
+     {
+      "children": [
+       {
+        "children": [],
+        "evidence_ids": [],
+        "problems": [],
+        "text": "Atomic-commit check: [missing: result of the atomic-commit check skill]",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C1",
+         "C2",
+         "C3",
+         "C4",
+         "C5"
+        ],
+        "problems": [],
+        "text": "quiz-service (5): https://bitbucket.org/ei-india-admin/quiz-service/commits/branch/feat%2Fattempt-migrator",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C6",
+         "C7",
+         "C8",
+         "C9"
+        ],
+        "problems": [],
+        "text": "canon-data (4): https://bitbucket.org/ei-india-admin/canon-data/commits/branch/update%2Fcanon-refresh",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C10",
+         "C11",
+         "C12",
+         "C13",
+         "C14",
+         "C15",
+         "C16",
+         "C17",
+         "C18",
+         "C19",
+         "C20",
+         "C21",
+         "C22",
+         "C23",
+         "C24",
+         "C25",
+         "C26",
+         "C27",
+         "C28",
+         "C29",
+         "C30",
+         "C31",
+         "C32",
+         "C33"
+        ],
+        "problems": [],
+        "text": "billing-service (24): https://bitbucket.org/ei-india-admin/billing-service/commits/branch/feat%2Fbilling-migrator",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C34",
+         "C35",
+         "C36",
+         "C37",
+         "C38",
+         "C39",
+         "C40",
+         "C41",
+         "C42",
+         "C43",
+         "C44",
+         "C45",
+         "C46",
+         "C47",
+         "C48",
+         "C49",
+         "C50",
+         "C51",
+         "C52",
+         "C53",
+         "C54",
+         "C55",
+         "C56",
+         "C57"
+        ],
+        "problems": [],
+        "text": "api-gateway (24): https://bitbucket.org/ei-india-admin/api-gateway/commits/branch/nav-aggregator-integration",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C58",
+         "C59",
+         "C60",
+         "C61",
+         "C62",
+         "C63",
+         "C64",
+         "C65"
+        ],
+        "problems": [],
+        "text": "portal-ui (8): https://bitbucket.org/ei-india-admin/portal-ui/commits/branch/migration",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C66",
+         "C67",
+         "C68",
+         "C69",
+         "C70",
+         "C71",
+         "C72",
+         "C73",
+         "C74",
+         "C75",
+         "C76",
+         "C77",
+         "C78",
+         "C79",
+         "C80",
+         "C81",
+         "C82",
+         "C83",
+         "C84",
+         "C85",
+         "C86",
+         "C87",
+         "C88",
+         "C89",
+         "C90",
+         "C91",
+         "C92",
+         "C93",
+         "C94",
+         "C95",
+         "C96",
+         "C97",
+         "C98"
+        ],
+        "problems": [],
+        "text": "portal-service-v4 (33): https://bitbucket.org/ei-india-admin/portal-service-v4/commits/branch/docs%2Fopenapi-descriptions",
+        "verified": true
+       }
+      ],
+      "evidence_ids": [],
+      "problems": [],
+      "text": "Commits",
+      "verified": true
+     }
+    ],
+    "title": "Done today",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": false,
+    "key": "plan_vs_actual",
+    "number": 2,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "P1",
+       "C72",
+       "C73",
+       "C74"
+      ],
+      "problems": [],
+      "text": "Implement the use-case documents for the consolidated services → Partly: portal OpenAPI and use-case docs for milestones, KDM contacts and contact roles were published and documented; broader consolidated-service use-case work beyond this move is not evidenced as newly finished today.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "P2",
+       "C66",
+       "C14",
+       "C78",
+       "C79"
+      ],
+      "problems": [],
+      "text": "Fix the DB migration scripts needed for those use-case changes → Done: migration 00010 for milestones and KDM, billing schema drops, and portal migrator stages for legacy SIS milestones and KDMs landed and were pushed.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "P3",
+       "C34",
+       "C36",
+       "C58",
+       "C59"
+      ],
+      "problems": [],
+      "text": "Apply the matching client-side fixes for the same changes → Done: api-gateway routes and composition for milestones/KDM, and portal-ui KDM read/save flows, were committed and pushed.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "P4",
+       "T4",
+       "T3",
+       "T5",
+       "T2",
+       "T8"
+      ],
+      "problems": [],
+      "text": "Test the client-side applications end to end → Partly: unit suites passed (portal-ui 999/999, gateway 1205/1205, portal-service-v4 1096/1096, billing 714/714); a playwright run was 6/10 passed with 2 failed and 2 skipped, so full E2E for the move is not closed from facts alone.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "P5",
+       "C82",
+       "C85",
+       "C51",
+       "K2"
+      ],
+      "problems": [],
+      "text": "Close gaps found in testing and sync with Rahul on the OpenAPI writing guide → Partly: many gap-fix commits landed on the move branches; no fact shows a Rahul sync on the guide today.",
+      "verified": true
+     }
+    ],
+    "title": "Plan vs actual",
+    "title_suffix": "(against the 19 Oct five-day plan, day 5 of 5)",
+    "trailer": [
+     "Extra, not in the plan: Quiz-service and billing test hardening (EIT-9333, EIT-9334), including billing invoice-cron lock/ledger work and CI for Postgres/migrator suites."
+    ]
+   },
+   {
+    "inline": false,
+    "key": "schedule",
+    "number": 3,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "K1",
+       "J1",
+       "J5"
+      ],
+      "problems": [],
+      "text": "On schedule: EIT-9286 in Review, due 2026-10-27.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "K4",
+       "K5",
+       "J6",
+       "J8"
+      ],
+      "problems": [],
+      "text": "On schedule: EIT-9333 and EIT-9334 In Progress, due 2026-10-27.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "K3",
+       "J3"
+      ],
+      "problems": [],
+      "text": "Behind: EIT-8403 due 2026-10-23, still Review, no commits today; migration comment posted, deployment still to confirm.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "K2",
+       "J4"
+      ],
+      "problems": [],
+      "text": "Behind: EIT-8383 due 2026-10-23, still Review, no commits today; skill-update comment posted.",
+      "verified": true
+     }
+    ],
+    "title": "Schedule",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": false,
+    "key": "blockers",
+    "number": 4,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "C10",
+       "C34",
+       "C66",
+       "R1"
+      ],
+      "problems": [],
+      "text": "Pushed EIT-9286 work has no PR in today's evidence, so review has not started on those branches.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "S4",
+       "K5"
+      ],
+      "problems": [],
+      "text": "EIT-9334 Excel sheet was not attached to Jira; agent session reported the gateway could not read the local file.",
+      "verified": true
+     }
+    ],
+    "title": "Blockers",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": false,
+    "key": "risks",
+    "number": 5,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "C14",
+       "C66",
+       "C78",
+       "C79"
+      ],
+      "problems": [],
+      "text": "Milestone/KDM schema drops, migration 00010 and legacy data copies are pushed but not deployed — owner me, check Mon 26 Oct.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "C10",
+       "C34",
+       "C66",
+       "C58"
+      ],
+      "problems": [],
+      "text": "Large multi-repo move sits on long feature branches without PRs, so review and rollback path for QA/Staging are unclear — owner me, Mon 26 Oct.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "T8"
+      ],
+      "problems": [],
+      "text": "Playwright run ended 6/10 passed with 2 failed and 2 skipped — owner me, recheck Mon 26 Oct.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "C33",
+       "S4"
+      ],
+      "problems": [],
+      "text": "First remote run of the new Postgres and migrator CI step may fail on pipeline/Docker setup rather than tests — owner me, check Mon 26 Oct.",
+      "verified": true
+     }
+    ],
+    "title": "Risks",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": false,
+    "key": "decisions",
+    "number": 6,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "C10",
+       "C11",
+       "C13",
+       "C34",
+       "C70"
+      ],
+      "problems": [],
+      "text": "Moved both SIS milestones and KDM use cases to portal-service-v4 and left billing without those families.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "C13",
+       "C78",
+       "C79"
+      ],
+      "problems": [],
+      "text": "Portal owns the legacy migrator stages for milestones and KDMs rather than billing.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "C1",
+       "C9"
+      ],
+      "problems": [],
+      "text": "Quiz-service ids are stored and typed as uuid, with non-uuid rejection implied by the hardening commits.",
+      "verified": true
+     }
+    ],
+    "title": "Decisions made",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": true,
+    "key": "releases",
+    "number": 7,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [],
+      "problems": [],
+      "text": "None.",
+      "verified": true
+     }
+    ],
+    "title": "Releases and deployment",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": false,
+    "key": "prs",
+    "number": 8,
+    "source": "deterministic",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "R1"
+      ],
+      "problems": [],
+      "text": "quiz-service PR #3 \"EIT-495 part 1 : Repo scaffolding, shared infrastructure, and OpenAPI common specifications\" EIT-495-part-1-foundation → development, OPEN, opened 28 May 15:18; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/3",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "R2"
+      ],
+      "problems": [],
+      "text": "quiz-service PR #4 \"EIT-495 (Part 2/5): pedagogy BC vertical slice + shared port interfaces\" EIT-495-part-2-pedagogy → EIT-495-part-1-foundation, OPEN, opened 28 May 15:20; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/4",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "R3"
+      ],
+      "problems": [],
+      "text": "quiz-service PR #5 \"EIT-495 (Part 3/5): contentattempt BC vertical slice\" EIT-495-part-3-contentattempt → EIT-495-part-2-pedagogy, OPEN, opened 28 May 15:23; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/5",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "R4"
+      ],
+      "problems": [],
+      "text": "quiz-service PR #6 \"EIT-495 (Part 4/5): application BC sources + top-level router\" EIT-495-part-4-application-sources → EIT-495-part-3-contentattempt, OPEN, opened 28 May 15:26; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/6",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "R5"
+      ],
+      "problems": [],
+      "text": "quiz-service PR #7 \"EIT-495 (Part 5/5): application BC tests + per-BC mocks\" EIT-495-part-5-application-tests → EIT-495-part-4-application-sources, OPEN, opened 28 May 15:28; no approval yet, open for 149d 5h – https://bitbucket.org/ei-india-admin/quiz-service/pull-requests/7",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "R6"
+      ],
+      "problems": [],
+      "text": "identity-service PR #312 \"feat: Add browser-close logout type\" EIT-6685 → master, OPEN, opened 05 Oct 14:57; no approval yet, open for 19d 5h – https://bitbucket.org/ei-india-admin/identity-service/pull-requests/312",
+      "verified": true
+     },
+     {
+      "children": [
+       {
+        "children": [],
+        "evidence_ids": [
+         "C1",
+         "C2",
+         "C3",
+         "C4",
+         "C5"
+        ],
+        "problems": [],
+        "text": "quiz-service feat/attempt-migrator – https://bitbucket.org/ei-india-admin/quiz-service/commits/branch/feat%2Fattempt-migrator",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C6",
+         "C7",
+         "C8",
+         "C9"
+        ],
+        "problems": [],
+        "text": "canon-data update/canon-refresh – https://bitbucket.org/ei-india-admin/canon-data/commits/branch/update%2Fcanon-refresh",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C10",
+         "C11",
+         "C12",
+         "C13",
+         "C14",
+         "C15",
+         "C16",
+         "C17",
+         "C18",
+         "C19",
+         "C20",
+         "C21",
+         "C22",
+         "C23",
+         "C25",
+         "C26",
+         "C27",
+         "C28",
+         "C29",
+         "C30",
+         "C31",
+         "C32",
+         "C33"
+        ],
+        "problems": [],
+        "text": "billing-service feat/billing-migrator – https://bitbucket.org/ei-india-admin/billing-service/commits/branch/feat%2Fbilling-migrator",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C34",
+         "C35",
+         "C36",
+         "C37",
+         "C38",
+         "C39",
+         "C40",
+         "C41",
+         "C42",
+         "C43",
+         "C44",
+         "C45",
+         "C46",
+         "C47",
+         "C48",
+         "C49",
+         "C50",
+         "C51",
+         "C52",
+         "C53",
+         "C54",
+         "C55",
+         "C56"
+        ],
+        "problems": [],
+        "text": "api-gateway nav-aggregator-integration – https://bitbucket.org/ei-india-admin/api-gateway/commits/branch/nav-aggregator-integration",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C58",
+         "C59",
+         "C60",
+         "C61",
+         "C62",
+         "C63",
+         "C64",
+         "C65"
+        ],
+        "problems": [],
+        "text": "portal-ui migration – https://bitbucket.org/ei-india-admin/portal-ui/commits/branch/migration",
+        "verified": true
+       },
+       {
+        "children": [],
+        "evidence_ids": [
+         "C66",
+         "C67",
+         "C68",
+         "C69",
+         "C70",
+         "C71",
+         "C72",
+         "C73",
+         "C74",
+         "C75",
+         "C76",
+         "C77",
+         "C78",
+         "C79",
+         "C80",
+         "C81",
+         "C82",
+         "C83",
+         "C84",
+         "C85",
+         "C86",
+         "C87",
+         "C88",
+         "C89",
+         "C90",
+         "C92",
+         "C93",
+         "C94",
+         "C95",
+         "C96",
+         "C97"
+        ],
+        "problems": [],
+        "text": "portal-service-v4 docs/openapi-descriptions – https://bitbucket.org/ei-india-admin/portal-service-v4/commits/branch/docs%2Fopenapi-descriptions",
+        "verified": true
+       }
+      ],
+      "evidence_ids": [],
+      "problems": [],
+      "text": "Branches with today's commits and no PR:",
+      "verified": true
+     }
+    ],
+    "title": "PRs and review turnaround",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": false,
+    "key": "learnings",
+    "number": 9,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "C1",
+       "C2",
+       "C3"
+      ],
+      "problems": [],
+      "text": "Quiz-service hardening had to add uuid id storage and parent-cycle rejection after weak tests were strengthened.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "C29",
+       "C30",
+       "C31"
+      ],
+      "problems": [],
+      "text": "Billing invoice cron needed a cluster-wide lock and raise-once ledger before it was safe to schedule.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "S4"
+      ],
+      "problems": [],
+      "text": "ei-mcp-gateway could not attach a local Mac Excel workbook to Jira from the remote gateway.",
+      "verified": true
+     }
+    ],
+    "title": "Learnings",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": false,
+    "key": "ai_tools",
+    "number": 10,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "S1",
+       "S3",
+       "S4"
+      ],
+      "problems": [],
+      "text": "Claude Code drove the EIT-9286 move across portal, billing, gateway, portal-ui and canon-data; a second session hardened quiz-service tests; a third rebased and pushed billing test/cron hardening.",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "T1",
+       "T2",
+       "T3",
+       "T4",
+       "T5",
+       "T8"
+      ],
+      "problems": [],
+      "text": "Checks: quiz-service go 8/8 packages; billing jest 714/714; gateway jest 1205/1205; portal-ui karma 999/999; portal-service-v4 jest 1096/1096; playwright 6/10 passed (2 failed, 2 skipped).",
+      "verified": true
+     }
+    ],
+    "title": "How I use AI tools and check quality",
+    "title_suffix": "",
+    "trailer": []
+   },
+   {
+    "inline": false,
+    "key": "plan_upcoming",
+    "number": 11,
+    "source": "llm",
+    "statements": [
+     {
+      "children": [],
+      "evidence_ids": [
+       "C66",
+       "C10",
+       "C34",
+       "M1",
+       "M2"
+      ],
+      "problems": [],
+      "text": "Mon 26 Oct: Raise short-lived PRs from the pushed EIT-9286 branches for Rahul review (owner: me).",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "K4",
+       "K5",
+       "M8",
+       "S4"
+      ],
+      "problems": [],
+      "text": "Mon 26 Oct: Leave only one of EIT-9333 / EIT-9334 In Progress; finish Excel docs and attach or link the sheets (owner: me).",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "T8",
+       "C14",
+       "C66"
+      ],
+      "problems": [],
+      "text": "Mon 26 Oct: Recheck playwright failures and confirm deployment/rollback notes before any QA push of the milestone/KDM move (owner: me).",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "K1",
+       "M6"
+      ],
+      "problems": [],
+      "text": "Tue 27 Oct: EIT-9286 due — close review comments and agree ship path with Daniel or Rahul (owner: me).",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "K4",
+       "K5"
+      ],
+      "problems": [],
+      "text": "Tue 27 Oct: EIT-9333 and EIT-9334 due — complete hardening verification rounds (owner: me).",
+      "verified": true
+     },
+     {
+      "children": [],
+      "evidence_ids": [
+       "K3",
+       "M3",
+       "M4"
+      ],
+      "problems": [],
+      "text": "Wed 28 Oct: Clear EIT-8403 deployment pending items and log linked Bugs for the credits defects (owner: me).",
+      "verified": true
+     }
+    ],
+    "title": "Plan for upcoming days",
+    "title_suffix": "",
+    "trailer": []
+   }
+  ],
+  "template_version": "99f459747ceb",
+  "work_date": "2026-10-23"
+ },
+ "gaps": [
+  {
+   "kind": "input",
+   "message": "CA-0102 was only mentioned in passing; add it to the Jira list if you worked on it",
+   "ref": null,
+   "section": "header"
+  },
+  {
+   "kind": "input",
+   "message": "EIT-8321 was only mentioned in passing; add it to the Jira list if you worked on it",
+   "ref": null,
+   "section": "header"
+  },
+  {
+   "kind": "input",
+   "message": "team members missing (set with `digest close --team`)",
+   "ref": null,
+   "section": "header"
+  },
+  {
+   "kind": "input",
+   "message": "day rating not given; it is never guessed (`digest close --rating 1|3|7|9`)",
+   "ref": null,
+   "section": "header"
+  },
+  {
+   "kind": "rule",
+   "message": "Name the unit tests added, not just counts. → tests reported as counts only; name the unit tests added",
+   "ref": "R03-named-tests",
+   "section": null
+  },
+  {
+   "kind": "rule",
+   "message": "Include the atomic-commit check result. → no atomic-commit check result",
+   "ref": "R04-atomic-commit",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Add plan vs actual against Friday's five-day plan, which started with Utility Service end-to-end testing and t",
+   "ref": "24995c29485ad92d",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Add the PR links and how long each took to get approved or rejected (17 Oct ask).",
+   "ref": "2c71bedc7c3d393c",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "answered in the closing, but needs a real action: Please also recheck CA-0214 and CA-0215, which don't open. (close with `digest asks set 599c32 done --evidence …`)",
+   "ref": "599c328002f40bea",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Following up on my 16 Oct ask... once Rahul reviews the guide, turn it into a skill that updates OpenAPI d",
+   "ref": "65b1218e000513a2",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Do you need help getting Rahul's review on the guide?",
+   "ref": "8af4b56a8e7f98d8",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Use Factory behind ei-mcp-gateway (https://docs.ei-poc.study/en-IN/mcp/welcome) on the work in hand.",
+   "ref": "99d8aabe4f3e565f",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "answered in the closing, but needs a real action: EIT-8372: run /microservice_review in dry-run on the utility-service changes before the PR, and /jira_to_produ (close with `digest asks set af1de8 done --evidence …`)",
+   "ref": "af1de8d00fff40ee",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "answered in the closing, but needs a real action: For each run, load the skill first, then its references, then the spec, then the code, and start in dry-run: (close with `digest asks set d4234b done --evidence …`)",
+   "ref": "d4234b31203b8df9",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "answered in the closing, but needs a real action: EIT-8371 (92 column renames): run /database_review on the forward migrations, then use deployment-patterns to  (close with `digest asks set f5b7da done --evidence …`)",
+   "ref": "f5b7dabd81dab959",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing (raised 2x): Four repos are pushed with no PRs, so none of this has been reviewed. Keep the OTP fix in its own commit, apar",
+   "ref": "320a9f5ba06c6d63",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "answered in the closing, but needs a real action: Run the security-audit workflow on the Identity and Billing diffs. Ask it to check account-number encryption, the (close with `digest asks set 539106 done --evidence …`)",
+   "ref": "53910655c5215d5f",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "answered in the closing, but needs a real action (raised 3x): That OTP fix is a security fix with no Jira bug. Without one, nobody can trace when the race was found, who ve (close with `digest asks set 7046e1 done --evidence …`)",
+   "ref": "7046e1da942d9d3d",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "needs a real action (raised 2x): EIT-8403 (https://ei-study.atlassian.net/browse/EIT-8403) has a 10,500-character description and a due date, b (close with `digest asks set 7948b6 done --evidence …`)",
+   "ref": "7948b68b3592b90a",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "needs a real action: EIT-8383 (https://ei-study.atlassian.net/browse/EIT-8383) is To Do, while your digest says the skill update is (close with `digest asks set ebb923 done --evidence …`)",
+   "ref": "ebb92386dd3436ce",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "needs a real action: Please agree with him and Daniel or Rahul which one ships. (close with `digest asks set 5883a1 done --evidence …`)",
+   "ref": "5883a19538b9bbe6",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Please add one for the credits call.",
+   "ref": "66d24b1562c413a7",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "needs a real action: Please share the branch list with Rahul as you said, and tell me when it is done. (close with `digest asks set 83d78e done --evidence …`)",
+   "ref": "83d78e6baabb65fa",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Do you have a crew of at least 10 agents managing your tasks, time, meetings, quality and builds?",
+   "ref": "aa177a19e63a37dc",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "needs a real action: Even so, please work on short-lived branches off each feature branch and raise regular PRs into it, so each ch (close with `digest asks set d6ec2b done --evidence …`)",
+   "ref": "d6ec2b3af0e02414",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "needs a real action: Raise the Portal v4 ticket once the open points are decided, with who decides and by when. (close with `digest asks set d755b1 done --evidence …`)",
+   "ref": "d755b134cc384919",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "needs a real action (raised 2x): I'd like a demo, given how you used parallel review agents. (close with `digest asks set e4765d done --evidence …`)",
+   "ref": "e4765d70100d66d6",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "needs a real action: Please also check that the .gitignore in billing-service covers all run output, and share the repo links in y (close with `digest asks set fd5ccc done --evidence …`)",
+   "ref": "fd5ccca445718a9e",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Would the contract test for the credits call that I suggested yesterday have caught it as well?",
+   "ref": "900a0dcfe6b09e63",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Will you keep naming the unit tests you add?",
+   "ref": "a267cb0b13fa535b",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: With 31 commits on portal-service-v4 alone, how will he review it in pieces?",
+   "ref": "cc2f7c98de0e65e5",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Logging the bugs and moving the rest to their right status whenever you can would tidy the board.",
+   "ref": "e7564d68554cd426",
+   "section": null
+  },
+  {
+   "kind": "ask",
+   "message": "not answered in the closing: Which one is truly active?",
+   "ref": "fad65133d313a898",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-9286 has no parent in Jira; fill parent",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-9286 has no Activity comment from you today; add what moved, what was verified, what is pending",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-8383 has no branch created from it (name a branch after the key)",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-8383 has no parent in Jira; fill parent",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-8403 has no branch created from it (name a branch after the key)",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-8403 has no parent in Jira; fill parent",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-9333 has no branch created from it (name a branch after the key)",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-9333 has no parent in Jira; fill parent",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-9333 has no Activity comment from you today; add what moved, what was verified, what is pending",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-9334 has no branch created from it (name a branch after the key)",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-9334 has no parent in Jira; fill parent",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "EIT-9334 has no Activity comment from you today; add what moved, what was verified, what is pending",
+   "ref": "R11-ticket-hygiene",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "27 tickets are In Progress: EIT-1115 (In Progress), EIT-1125 (Review), EIT-1126 (Review), EIT-1277 (In Testing), EIT-1981 (Review), EIT-2256 (Review), EIT-2263 (Review), EIT-2269 (In Progress), EIT-370 (Review), EIT-4373 (Review), EIT-4908 (Review), EIT-495 (Review), EIT-6698 (In Progress), EIT-6699 (Review), EIT-6775 (Review), EIT-6821 (Review), EIT-7916 (Review), EIT-8321 (Review), EIT-8366 (Review), EIT-8370 (Review), EIT-8371 (Review), EIT-8372 (Review), EIT-8383 (Review), EIT-8403 (Review), EIT-9286 (Review), EIT-9333 (In Progress), EIT-9334 (In Progress); keep one and move the others",
+   "ref": "R12-one-in-progress",
+   "section": null
+  },
+  {
+   "kind": "real_action",
+   "message": "CA-0102 does not open in Jira (missing or no access); check the key",
+   "ref": "jira-missing",
+   "section": null
+  }
+ ],
+ "provider": "cursor_cli",
+ "created_at": "2026-10-24T20:43:34.272459+05:30"
+}

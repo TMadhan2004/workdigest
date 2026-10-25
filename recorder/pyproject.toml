@@ -1,0 +1,109 @@
+[project]
+name = "workdigest"
+version = "0.1.0"
+description = "Passive work recorder and daily digest engine for macOS."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+authors = [{ name = "WorkDigest contributors" }]
+dependencies = [
+  "pydantic>=2.9",
+  "typer>=0.12",
+  "rich>=13.7",
+  "keyring>=25.4",
+]
+
+[project.scripts]
+digest = "workdigest.cli:app"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=5.0",
+  "hypothesis>=6.112",
+  "ruff>=0.7",
+  "mypy>=1.13",
+]
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/workdigest"]
+
+[tool.hatch.build]
+# Built by `make web` / the release workflow; ignored by git but shipped in the wheel.
+artifacts = ["src/workdigest/setup/web/**", "src/workdigest/setup/team.json"]
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers --strict-config"
+markers = [
+  "integration: touches real subprocesses, git or the filesystem beyond tmp files",
+  "live: needs network or a live LLM; never runs in CI by default",
+  "supabase: needs the local Supabase stack (`supabase start`); skipped when it is not running",
+]
+filterwarnings = ["error"]
+
+# --------------------------------------------------------------- coverage
+[tool.coverage.run]
+source = ["workdigest"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
+exclude_also = [
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+]
+
+# ------------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W", "F", "I", "N", "UP", "B", "A", "C4", "DTZ", "T20", "SIM", "RET",
+  "PTH", "PL", "RUF", "S", "BLE", "TRY", "ERA", "PIE", "PT", "ANN", "D",
+]
+ignore = [
+  "D100", "D104", "D105", "D107", "D203", "D213",
+  "TRY003", "PLR2004", "PLR0913", "S603", "S607",
+  # JSON payloads from agents are untyped at the boundary and narrowed with isinstance.
+  "ANN401",
+  # ruff format enforces line length for code; long user-facing strings stay readable.
+  "E501",
+  # The digest format uses typographic dashes and arrows (–, →, ‘ ’) by design.
+  "RUF001", "RUF002", "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test data literals (real tool output, secrets corpus) are kept verbatim on one line.
+# Example output lines in comments look like code to eradicate.
+"src/workdigest/ingest/test_parsers.py" = ["ERA001"]
+# Typer commands declare each CLI option as a parameter.
+"src/workdigest/digest_cli.py" = ["PLR0917"]
+"src/workdigest/cloud_cli.py" = ["PLR0917", "PLC0415", "S607"]
+"src/workdigest/cli.py" = ["PLR0917"]
+"tests/**" = ["E501", "S101", "ANN", "D", "PLR2004", "S105", "S106", "S108", "PLC0415"]
+# The hook entry point must swallow every exception and only use the stdlib.
+"src/workdigest/hooks/hook_entry.py" = ["BLE001", "S110", "UP", "PTH", "DTZ"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+# ------------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+files = ["src"]
+plugins = ["pydantic.mypy"]

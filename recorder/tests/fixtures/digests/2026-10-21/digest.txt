@@ -1,0 +1,87 @@
+Greetings Priya,
+
+Daily digest – Wed, 21 Oct 2026
+Jira:
+- EIT-8403 – Move billing profiles and user credits usecases from Identity Service to Billing Service
+  https://ei-study.atlassian.net/browse/EIT-8403
+- EIT-8383 – Enhance the OpenAPI spec writer skill with lessons from the consolidated services' OpenAPI refinements
+  https://ei-study.atlassian.net/browse/EIT-8383
+Confluence: https://ei-study.atlassian.net/wiki/spaces/~712020ceae13b03d30455ebc4ce41736ab9dd0/pages/2303230002
+
+In short: billing profiles (GSTIN, TAN, card, billing name and address) and the per-user credit wallet moved from Identity Service to Billing Service. Code, OpenAPI, tests, the gateway, canon-data and the remote databases are updated, and account numbers are now encrypted at rest. Four repos are pushed. The portal UI change is ready but not committed. Nothing is deployed yet. Separately, the OpenAPI spec writer skill now carries the lessons from the OpenAPI refinements. It is pushed but not yet tried on a real spec.
+
+1. Done today
+   1. EIT-8403 – Moved billing details and user credits from Identity to Billing
+      - Billing now holds each tenant's account and billing details (GST, TAN, card, billing name and address) and each user's credit balance. Before, these lived in Identity.
+      - The account numbers are now stored encrypted. Before, they were stored as plain text.
+      - A tenant user can only see and change their own tenant's billing details. Our internal staff can see all tenants.
+      - Identity no longer has these features. Its old code, tables and documentation were removed.
+      - The gateway now sends these requests to Billing. When a user is deleted, their credits are also removed from Billing.
+      - The Portal app now reads and saves account details from Billing. If Billing is unavailable, it shows a warning instead of an empty screen.
+      - The shared data dictionary (canon-data) and the API documentation are updated to match.
+   2. Moved the data on the shared server
+      - Took backups first.
+      - Copied the 3 credit balances and their 3 history entries into Billing, and checked that the copies match exactly.
+      - Removed the old tables from Identity.
+      - The 2 account records in Identity were dummy test data, so we did not copy them.
+   3. Fixed existing problems found along the way
+      - Billing: cleaned up code-style and documentation errors, and raised test coverage above the required level.
+      - Identity: fixed all code-style warnings.
+      - Identity: fixed a real security bug. A one-time login code (OTP) could be used twice if two requests arrived at the same moment. It now works only once.
+   4. EIT-8383 – Updated open api spec writing skill in ei-factory-mcp
+      - The skill now checks the actual code before writing, follows each project's existing style, and applies the writing rules that is agreed on discussion with rahul.
+      - Implementation is done, but needs to test the updated skills with multiple models.
+
+2. Plan vs actual (against the 19 Oct five-day plan, day 3 of 5)
+   1. Implement the use-case documents for the consolidated services → Done for Identity UC-6 (billing profiles) and UC-7 (credit wallet).
+   2. Fix the DB migration scripts for those changes → Done: billing 00008 / 00009, identity 00006 / 00007, and the copy job. Applied locally and on remote.
+   3. Client-side fixes for the same changes → Done in the gateway and portal UI. UI not committed yet.
+   4. Test the client applications end to end → Partly: all automated suites pass. Manual contract-screen check against deployed services is still to do.
+   5. Close gaps and sync with Rahul on the OpenAPI guide → Guide applied to the EIT-8383 skill. 
+   Extra, not in the plan: the billing and identity lint/coverage/Spectral fixes, the OTP race fix, and the API catalog generator fix.
+
+3. Schedule
+   1. On schedule: EIT-8403 code, tests and remote DB migration.
+   2. Behind: portal UI commit and the manual end-to-end check (moved to tomorrow).
+   3. On schedule: EIT-8383 skill update; testing on a real spec is tomorrow.
+
+4. Blockers
+   None.
+
+5. Risks
+   1. Real account data is still only in legacy client-management (2,428 rows, 877 active, last changed 14 Oct). Identity never migrated it. Billing will show no account details for real tenants until a legacy copy is done (separate task). - This needs to be handled
+
+6. Decisions made
+   1. Encrypt GSTIN / TAN / card at rest in Billing and keep identity's hash for matching.
+
+7. Releases and deployment - None
+
+8. PRs and review turnaround
+   1. No PRs opened today. All work is pushed to feature branches. PR for EIT-8383 will be opened tomorrow after the skill test.
+   2. Turnaround: none to report today. From tomorrow, I'll track opened → approved/rejected time per PR.
+
+9. Learnings
+   1. Check what is actually in the database before planning a migration. Identity's credit and account tables only ever held seed rows. The real data is in legacy, which changes what "moving the data" means.
+   2. A flaky test can hide a real bug. The flaky OTP test was a real double-use race in production code.
+   3. Columns named *_encrypted were storing plain text in identity. Names prove nothing; the code does.
+   4. Canon drift can start on day one. billing_name and client_type were copied from legacy validators when canon was created and never matched the new schemas.
+
+10. How I use AI tools and check quality
+   1. ei-mcp-gateway: created EIT-8403 from my ticket template, wrote today's Confluence page, and read the 16 / 19 Oct pages.
+   2. Claude Code agent:
+      - Planned the move with a stop-and-review gate per section.
+      - Ran background agents for the coverage tests and the identity lint / OTP fix.
+      - Ran the remote DB steps with read-only checks before each change.
+   3. Quality checks:
+      - Unit tests: billing 644/644, gateway 316/316, UI 971/971, identity go test pass.
+      - Billing API matrix: 3,333/3,333 with nothing skipped.
+      - Postgres tests: 11/11 Postgres, 10/10 copy job.
+      - Checksums equal on the remote copy.
+      - canon-data validate + gate self-test.
+      - Spec description edits approved line by line before editing, following openapi-spec-writing-guide.md.
+
+11. Plan for the next 5 days
+   1. Test the portal-ui with the new updated usecase.
+   2. End-to-end check of the contract account-details flow and the credit routes.
+   3. Test the EIT-8383 skill on a real operation, open its PR, and get Rahul's review of the OpenAPI guide.
+   4. Plan the legacy tax_details → Billing copy as a new ticket.

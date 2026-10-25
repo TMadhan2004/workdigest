@@ -1,0 +1,44 @@
+# OS / editors
+.DS_Store
+.idea/
+*.iml
+*.swp
+
+# Python (recorder)
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+
+# Local data — never commit evidence, spools or secrets
+*.sqlite3
+*.sqlite3-*
+spool/
+.env
+.env.*
+!.env.example
+*.workdigest-backup-*
+
+# Never commit credentials
+creds.txt
+*.creds
+
+# Personal run shortcuts
+run.txt
+
+# Built setup pages (bundled into the wheel by `make web`) and the release's team file
+recorder/src/workdigest/setup/web/
+recorder/src/workdigest/setup/team.json
+
+# Web workspace
+web/node_modules/
+web/.angular/
+web/dist/
+web/test-results/
+web/playwright-report/

@@ -1,0 +1,21 @@
+Greetings Arjun!
+
+Very good... this reads much easier now. Forward-only migrations for 92 column renames with the API names unchanged, 966/966 UI, 297/297 gateway and 40/40 translation tests, and the two bugs fixed in the same work... good discipline. Thanks for starting openapi-spec-writing-guide.md after my 16 Oct ask on ei-mcp-gateway skills.
+
+1. Add plan vs actual against Friday's five-day plan, which started with Utility Service end-to-end testing and the identity use cases.
+2. Add the PR links and how long each took to get approved or rejected (17 Oct ask).
+3. Risks says None after renaming 92 columns across three services. What is the rollout and rollback plan for QA and Staging, and is it in deployment-instructions.md?
+
+Following up on my 16 Oct ask... once Rahul reviews the guide, turn it into a skill that updates OpenAPI descriptions and the gateway wiring from the live service contracts. Build it on openapi-spec-writer, and use Apidog /apidog_contract_drift on utility-service to show where the contract and the code differ.
+
+Use Factory behind ei-mcp-gateway (https://docs.ei-poc.study/en-IN/mcp/welcome) on the work in hand. For each run, load the skill first, then its references, then the spec, then the code, and start in dry-run:
+• EIT-8371 (92 column renames): run /database_review on the forward migrations, then use deployment-patterns to write the rollout and rollback steps into deployment-instructions.md.
+• EIT-8372: run /microservice_review in dry-run on the utility-service changes before the PR, and /jira_to_production in plan mode with the key so the branch comes from the ticket.
+
+Do you need help getting Rahul's review on the guide?
+
+Please follow the daily digest structure I shared in the group every day, the 11-point checklist of 16 Oct plus the 17 Oct points 1 to 4... your 19 Oct digest misses plan vs actual (2), releases (7), learnings (9), PR turnaround (17 Oct point 1) and deployment-instructions.md (17 Oct point 4).
+
+On Jira... none of your tickets has a branch created from it or a meaningful comment, for example EIT-8371 and EIT-8372. Please also recheck CA-0214 and CA-0215, which don't open.
+
+On arrival... your average since 9 Oct is 09:31, and you were in by 9:00 on 0 of 6 office days. You are close. Please try to be in by 9am on office days so the scrum works face to face. On WFH days, join the call.

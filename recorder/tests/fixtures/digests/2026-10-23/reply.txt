@@ -1,0 +1,14 @@
+Hi Arjun,
+
+This digest acts on most of what we discussed this week. The comments on https://ei-study.atlassian.net/browse/EIT-8403 and https://ei-study.atlassian.net/browse/EIT-8383, the branch links for all five repos, the atomic-commit check with four commits split, and the "In short" line at the top are all in. Your migration on https://ei-study.atlassian.net/browse/EIT-9286 is strong work. Reviewing it against Billing's behaviour caught the weaker tenant-level check. Would the contract test for the credits call that I suggested yesterday have caught it as well?
+
+I understand Rahul agreed to feature-branch reviews for now. With 31 commits on portal-service-v4 alone, how will he review it in pieces? Short-lived PRs into each feature branch could make that easier for him. Leaving the identity-service #312 call to Vikram and Rahul was right, since they own it.
+
+Two asks from the day before yesterday are still open. The OTP and empty-DELETE issues are not yet logged as Jira Bugs, and five tickets sit In Progress, EIT-9333, EIT-9334, EIT-6698, EIT-2269 and EIT-1115, the last two untouched since June. Which one is truly active? Logging the bugs and moving the rest to their right status whenever you can would tidy the board.
+
+Your test counts are already thorough. Will you keep naming the unit tests you add? A rating for your day alongside the "In short" line, 1, 3, 7 or 9, where 1 means very tough and 9 super fantastic, would help me too. Today's came around 9:15pm, so a send before 9pm would let me reply earlier.
+
+You were in at 8:53am today, ahead of the 8:59am mark. I'd still like the agent-crew demo, given how you ran parallel review agents. Rahul can carry any thoughts you have on the digest or the consolidation work.
+
+Best Regards
+Priya Perumal

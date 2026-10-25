@@ -1,0 +1,15 @@
+# gitleaks: the default rules, plus the fake secrets the redaction tests feed in on purpose
+# (each one is made up; the JWT is the public jwt.io example). Only these exact values are allowed.
+title = "WorkDigest"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Made-up secrets in the redaction tests"
+regexes = [
+  '''A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8''',
+  '''abcDEF123456ghiJKL789''',
+  '''eyJhbGciOiJIUzI1NiJ9\.eyJzdWIiOiIxMjM0NTY3ODkwIn0\.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U''',
+  '''ATxyzVeryLongTokenValue987''',
+]

@@ -1,0 +1,133 @@
+Greetings Priya,
+
+Thanks for the detailed review. Regarding PRs, the consolidated services (Billing, Identity, Gateway, and Portal UI changes) are being written from scratch, so there isn't yet a stable base branch to raise PRs against and merge into. We're keeping the work on feature branches, which Rahul reviews directly, and I'll share the branch list with him. Starting today, I'm running the atomic-commit check skill before every push. Today's work went in as nine single-purpose commits across three repos, each built and tested independently. Regarding bugs, I found and fixed the OTP double-use issue while working on another change in the new Identity Service. Since the code has never been deployed, no users or environments were affected; the issue was caught during development, before any release. I therefore didn't raise a separate Jira bug, as the root cause, fix, and new test are documented in the commit and test case TC-UN-9701.
+
+Daily digest – Thu, 22 Oct 2026
+Jira:
+- EIT-8403 – Move billing profiles and user credits usecases from Identity Service to Billing Service
+  https://ei-study.atlassian.net/browse/EIT-8403
+- EIT-8383 – OpenAPI spec writing skill enhancements based on the refinements of the consolidated services' OpenAPI specs
+  https://ei-study.atlassian.net/browse/EIT-8383
+Open api spec updated Skill test results: https://ei-study.atlassian.net/wiki/x/BAFTiQ
+
+In short: the real legacy account and credit data is now in Billing on the remote database 163. There are 2,428 billing profiles, every account number is encrypted, and all of them read back correctly. Billing now has one migrator that copies from the legacy databases and can be re-run safely to pick up later changes. I tested the Portal account-details flows end to end for one tenant, and they work. Testing found a real gateway bug: deleting a user did not remove their credits. It's fixed, and a review found the same bug in two Portal lead actions, which the same fix covers. All work is committed as single-purpose commits and pushed. Nothing is deployed yet. I also looked at whether the two Billing use cases should move to Portal Service v4: both should. Separately, the OpenAPI spec writer skill in ei-factory-mcp is updated with what we learned from refining the consolidated services' specs. In 8 test runs it clearly beat the old skill, and the PR is raised.
+
+1. Done today
+   1. EIT-8403 – Billing migrator: one migrator that copies from legacy
+      - Removed the separate "copy from Identity" job. Billing now has one command (npm run migrate:legacy). It reads the legacy client-management database (account details) and the legacy IAM database (credits), along with the order, payment and subscription data it already copied.
+      - It can be run any number of times. Each run picks up new or changed legacy rows, keeps the newest version, and never overwrites changes made in Billing.
+      - Account numbers (GST, TAN, card) are encrypted as they're copied. They never appear as plain text in Billing, the run reports or the "skipped rows" list.
+      - Group-level account records are stored as organisation-group records. Active and inactive records are both copied. Each user's credit history is replayed in order, so the history matches the balance.
+      - Fixed a bug during the run: legacy records with an empty status were being loaded as active (2,156 active against 877 in legacy). They now load as inactive, which matches what the legacy app shows.
+      - Fixed a small leak found in review: when a account record clashed with an existing one, the run report printed a fingerprint (hash) of the card. It now shows [hidden] with the row id.
+   2. Ran the migrator on the shared server
+      - Took a backup of the Billing database first.
+      - Loaded 2,428 billing profiles (877 active, 1,551 inactive; 59 of them are group-level), 1 credit wallet and its 37 history entries.
+      - Checked that every one of the 4,014 stored account numbers decrypts correctly, and that the counts match legacy.
+      - This replaces yesterday's Identity test rows with real data and closes yesterday's risk.
+   3. Tested the Portal app end to end (tenant 500119, order 9536)
+      - Viewing: the contract screen shows the tenant's existing account details from Billing.
+      - First save: with no account details on file, saving the contract creates one billing profile.
+      - Editing: saving TAN first, then card and GST, updates the same profile each time instead of creating duplicates. Signing the contract (Generate) also updated it correctly.
+      - Billing down: with Billing stopped, the screen shows a "could not load account details" warning and blocks saving, so empty fields can't wipe out real data.
+      - OMS: the Proposal Information pop-up shows the account details.
+      - CSL: after signing, the order card in CSL Order Approvals shows the account details. I also confirmed that the "All" filter there intentionally lists only signed, on-hold, confirmed and rejected orders.
+      - Access: a user from one tenant can't see or change another tenant's account details. This is blocked both in the app and through the API.
+      - Deleting a user: their credits are removed from Billing. This test found the gateway bug below.
+   4. Fixed a gateway bug during development: credits not removed when a user is deleted 
+      - When a user was deleted, the gateway asked Billing to remove their credits. The request was malformed: it claimed to carry data but carried none, and Billing rejected it. The failure was logged quietly, so nobody noticed. The automated tests didn't catch it because they use a fake Billing.
+      - Fixed it, made the error log say exactly why a call failed, and added a test. I checked the fix against the real services with a test user, and re-sent the clean-ups that had been queued while the bug was live.
+      - I then reviewed the gateway for the same problem. Two Portal lead actions had it too: removing duplicate "interested product" entries from a lead, and removing products from a lead stage. They had been failing silently, and the same fix covers them. No other calls are affected.
+      - Since the code has never been deployed, no users or environments were affected; the issue was caught during development, before any release hence bug tickets are not raised. 
+   5. Final review and commits
+      - Reviewed all of today's changes before committing. Two fixes came out of it (the card fingerprint above, and keeping the shared-server run output out of git)..
+      - Made the commits with the atomic-commit check skill: one purpose per commit, and each commit built and tested on its own. Pushed to the feature branches:
+        - billing-service (4): load legacy account and credit data; remove the old Identity copy job; hide account fingerprints in reports; ignore run-output folders.
+        - api-gateway (2): fix the empty DELETE request; clearer clean-up failure log.
+        - portal-ui (3): read organisations through the gateway; save account details to Billing; block saving when account details failed to load.
+      - Atomic-commit check: passed (9 commits, all single-purpose).
+   6. Analysis: moving two Billing use cases to Portal Service v4
+      - SIS onboarding milestones: valid to move. Billing makes no price, invoice, payment, order-status or entitlement decision with them. Portal already has the matching pieces (onboardings, milestone catalogue, forms, history), so today two services track the same onboarding steps. The order dates Portal needs stay in Billing.
+      - Key decision makers (KDMs): valid to move. Billing only stores them. A KDM is a role on a CRM contact, so it should move with or after the contacts move from Identity to Portal (being done in parallel by another person). Creating logins for KDMs stays with Identity.
+      - Open points: whether the contract signatory stays on the Billing order, and updating the canon note that currently keeps milestone configs in Billing.
+   7. EIT-8383 – OpenAPI spec writer skill in ei-factory-mcp
+      - Updated the openapi-spec-writer skill with the rules we learned while refining the Identity, Attempt and Notification specs:
+        - The agent reads the route, handler, service and SQL before writing, and documents only behaviour it verified, with exact error codes.
+        - Descriptions explain behaviour (filters, ordering, defaults, empty results, errors) instead of repeating the parameter list.
+        - An existing spec keeps its own format and conventions; the enterprise defaults apply only to new specs.
+        - Added one writing standard, edit guardrails and a final report that lists what could not be verified.
+      - Added a new reference for Optimisation sections: how to verify each speed claim and how to write known limitations. Aligned the other reference files so they no longer contradict each other.
+      - Testing: 8 runs on a copy of quiz-service with its spec removed. Each run used its own branch, in Claude Code (Claude Opus 5.5) and Cursor (Auto), comparing the old skill with the updated one:
+        - Writing a spec from scratch (runs 1 to 4).
+        - Refining the old skill's weakest output (runs 5 and 6).
+        - Adding Optimisation sections (run 7).
+        - A final check of the refinements (run 8).
+        Each output was checked against the service code, lint and the original hand-refined spec.
+      - Results: the old skill documented 1 error code in Cursor and wrongly claimed a bearer-token check the service doesn't do. The updated skill documented 67 to 68 error codes, with 0 lint errors from scratch (old skill: 8 to 19).
+      - Applied five refinements found in testing, and confirmed four of them in run 8. One, not guessing which client calls an operation, still fails with the weaker Cursor Auto model.
+      - Made the commits with the atomic-commit check skill (2 single-purpose commits), pushed to branch EIT-8383 and raised the PR into master. The repo's quality checks pass, and search accuracy matches master.
+
+2. Plan vs actual (against the 19 Oct five-day plan, day 4 of 5)
+   1. Implement the consolidated-service use cases → Done for UC-6 and UC-7, now including real legacy data.
+   2. Fix the DB migration scripts → Done. One re-runnable legacy migrator, run on the shared server.
+   3. Client-side fixes → Done. Portal UI committed and pushed. The gateway bug found in testing is fixed.
+   4. Test the client apps end to end → Done locally (scenarios above). Checking real tenants on the shared environment waits for deployment.
+   5. OpenAPI guide / EIT-8383 → Done. Skill updated, tested in 8 runs, PR raised.
+   Extra, not in the plan: The migrator status fix, and the analysis of moving Billing use cases to Portal.
+
+3. Schedule
+   1. On schedule: EIT-8403 code, data and local end-to-end testing.
+   2. EIT-8383: on schedule. Waiting for PR review.
+
+4. Blockers
+   None.
+
+5. Risks
+   None
+   
+6. Decisions made
+   1. One legacy migrator for everything (the separate Identity copy job is removed).
+   2. Legacy account records with an empty status are treated as inactive, matching the legacy app.
+   3. Group-level account records become organisation-group records. All statuses are copied, and credit history is replayed.
+   4. Code is reviewed on feature branches by Rahul instead of through PRs, until the consolidated services have a stable base branch.
+
+7. Releases and deployment - None
+
+8. PRs and review turnaround
+   1. No PRs for EIT-8403. Work is on feature branches for Rahul's review: billing-service feat/billing-migrator, api-gateway nav-aggregator-integration, portal-ui migration, identity-service data-migration-rebased, canon-data update/canon-refresh.
+   2. EIT-8383: PR raised today, ei-factory-mcp EIT-8383 → master. https://bitbucket.org/ei-india-admin/ei-factory-mcp/pull-requests/41
+
+9. Learnings
+   1. Fake services in tests can hide real integration bugs. The empty-DELETE bug passed every automated test and was found only by testing against the real services.
+   2. "Our UI doesn't call it" doesn't mean "unused". Other clients may depend on an API, so moved APIs keep their contract.
+   3. An empty value in legacy data can carry meaning. An empty status meant "inactive" in the legacy app, and loading it as active would have shown 1,279 wrong profiles.
+   4. Error messages and reports can leak sensitive data. Even a fingerprint of a card shouldn't be printed.
+   5. A skill is only as good as the model following it. Claude Opus 5.5 followed the updated skill closely, while Cursor Auto followed the structure but skipped some rules (in one run it rewrote descriptions with a script). Rules that can be checked hold up better than rules that rely on judgement.
+
+10. How I use AI tools and check quality
+   1. Claude Code agent:
+      - Ran parallel review agents on the migrator and UI changes.
+      - Split the work into single-purpose commits with the atomic-commit check, testing each commit on its own before pushing.
+      - Analysed the Billing → Portal use cases against the code in all repos.
+   2. Quality checks today:
+      - Billing: unit tests 650/650; migrator 25/25 unit and 17/17 integration (each commit also tested on its own).
+      - Gateway: 318/318.
+      - Portal UI: type checks pass; billing, CRM and OMS specs 51/51.
+      - Shared-server copy: counts match legacy, and all 4,014 account numbers decrypt.
+   3. ei-factory-mcp:
+      - Tested the updated skill as a local MCP server (factory-local) against the deployed skill served through ei-mcp-gateway, using Claude Code and Cursor.
+      - Reviewed every run against the code and recorded it in Confluence.
+      - Checks: npm run quality:check passes; search eval unchanged from master; each commit tested on its own.
+
+11. Plan for upcoming days
+   1. Billing → Portal Service v4. Get decisions on the open points, then create the Jira ticket:
+      - Whether milestone configs move (this changes the canon note).
+      - Whether the contract signatory stays on the Billing order.
+      - Timing of the KDM move with whoever is moving contacts.
+   2. Write the move plan with review stops per section, covering Billing, gateway, Portal Service v4, UI, canon-data, OpenAPI, tests and the migrator. Start with milestones, because they don't depend on the contacts move.
+   3. Follow-ups for the move
+      - Keep the same API behaviour for other clients; the gateway re-routes the paths, so nothing is deleted outright.
+      - Milestone syncs need a new endpoint in Portal.
+      - The "onboarding context" order facts stay in Billing, minus the hard-coded milestones_ready flag.
+      - Fix two known defects instead of carrying them over: field values saved against a hard-coded form field, and the primary KDM being dropped when an order is created.
+      - KDMs move with or after the contacts move.

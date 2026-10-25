@@ -1,0 +1,18 @@
+Hi Arjun,
+
+Thank you for explaining the PRs. I understand the consolidated services are being written from scratch and Rahul reviews the feature branches. Even so, please work on short-lived branches off each feature branch and raise regular PRs into it, so each change gets its own review, pipeline run and history. Please share the branch list with Rahul as you said, and tell me when it is done.
+
+Finding the empty DELETE bug by testing against real services, then searching the gateway for the same mistake, was very good work. I accept that the OTP and gateway issues were caught before release. Still, please log each as a Jira Bug linked to EIT-8403, with the root cause and fix, so we can see where defects come from.
+
+Your learning about fake services hiding integration bugs is important. Martin Fowler's Contract Tests fill this gap. A contract test is a small test that checks your fake still behaves like the real Billing service. Please add one for the credits call. The re-runnable migrator also follows his Parallel Change idea for the Billing to Portal move, so the old and new paths can live together until clients switch.
+
+On https://ei-study.atlassian.net/browse/EIT-8403 there were no Activity comments on 21-Oct-2026, and https://ei-study.atlassian.net/browse/EIT-8383 was behind the work. Please add a short comment on what moved today, and fill due date and parent on both. Both are due 23-Oct-2026 and in Review. Your identity-service PR https://bitbucket.org/ei-india-admin/identity-service/pull-requests/312 has been open since 05-Oct-2026 with no approval, and Vikram's #319 now covers the same ticket. Please agree with him and Daniel or Rahul which one ships. Raise the Portal v4 ticket once the open points are decided, with who decides and by when.
+
+EIT-1115 and EIT-2269, from June, and EIT-6698 are all In Progress. Please keep only one In Progress at a time and move the others to the right status.
+
+Your work on the openapi-spec-writer skill is the Factory contribution I hope for. Do you have a crew of at least 10 agents managing your tasks, time, meetings, quality and builds? I'd like a demo, given how you used parallel review agents. Please also check that the .gitignore in billing-service covers all run output, and share the repo links in your next digest.
+
+From the next digest, open with one line on the project and the people you work with. If you are away or have an exception to the three office days, tell me the date you'll be back. You punched in at 9:09am today and your 10-day average is 9:31am. On office days the day starts before 8:59am, with no exception.
+
+Best Regards
+Priya Perumal

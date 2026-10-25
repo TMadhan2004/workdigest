@@ -1,0 +1,40 @@
+# Install: `uvx pre-commit install`. Runs the fast subset of `make check` on each commit.
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: detect-private-key
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format
+        entry: uv --directory recorder run ruff format --check src tests
+        language: system
+        pass_filenames: false
+        files: ^recorder/
+      - id: ruff
+        name: ruff check
+        entry: uv --directory recorder run ruff check src tests
+        language: system
+        pass_filenames: false
+        files: ^recorder/
+      - id: mypy
+        name: mypy --strict
+        entry: uv --directory recorder run mypy
+        language: system
+        pass_filenames: false
+        files: ^recorder/src/
+      - id: test-catalog
+        name: test-case catalog is current
+        entry: python3 scripts/gen_test_catalog.py --check
+        language: system
+        pass_filenames: false
+        files: ^recorder/tests/
