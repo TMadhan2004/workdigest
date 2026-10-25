@@ -36,11 +36,12 @@ html { scroll-behavior: smooth; scroll-padding-top: 88px; }
 .phone-glow { position: absolute; width: 120%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--wd-glow-b) 70%, transparent), transparent); filter: blur(30px); animation: wd-breathe 8s ease-in-out infinite alternate; }
 @keyframes wd-breathe { from { transform: scale(0.92); opacity: 0.7; } to { transform: scale(1.05); opacity: 1; } }
 
-/* The phone mockup */
-.phone { position: relative; width: min(300px, 78vw); aspect-ratio: 9 / 19; border-radius: 44px; padding: 12px; background: linear-gradient(160deg, #2a2733, #121116); box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12), 0 40px 90px rgba(0, 0, 0, 0.45); }
-.phone-notch { position: absolute; top: 20px; left: 50%; width: 76px; height: 22px; transform: translateX(-50%); border-radius: 12px; background: #000; z-index: 2; }
-.phone-screen { height: 100%; border-radius: 34px; overflow: hidden; background: #0e0d12; padding-top: 30px; } /* room for the camera, like a status bar */
-.phone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+/* The phone: a Pixel-style frame with a single punch-hole camera over a full-bleed screen.
+   The screen has the screenshots' exact shape (412 × 915), so nothing is cropped. */
+.phone { position: relative; width: min(300px, 78vw); padding: 10px; border-radius: 42px; background: linear-gradient(160deg, #2c2933, #141218 60%, #1d1b22); box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.10), inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 40px 90px rgba(0, 0, 0, 0.45); }
+.phone-screen { position: relative; aspect-ratio: 412 / 915; border-radius: 32px; overflow: hidden; background: #0e0d12; }
+.phone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.phone-camera { position: absolute; z-index: 2; top: 10px; left: 50%; width: 13px; height: 13px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle at 35% 35%, #2b2f3a 0 25%, #050507 55%); box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.55); }
 
 /* Sections */
 .section { padding: 110px 0; }

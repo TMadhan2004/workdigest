@@ -18,8 +18,8 @@ const DESCRIPTIONS: Record<Screen, string> = {
   selector: 'wd-phone',
   template: `
     <div class="phone">
-      <div class="phone-notch" aria-hidden="true"></div>
       <div class="phone-screen">
+        <span class="phone-camera" aria-hidden="true"></span>
         <img [src]="src()" [alt]="description()" width="412" height="915" decoding="async"
              [attr.loading]="eager() ? 'eager' : 'lazy'" [attr.fetchpriority]="eager() ? 'high' : null" />
       </div>
