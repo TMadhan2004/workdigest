@@ -107,7 +107,7 @@ def update(
         raise typer.Exit(1)
     if LaunchAgent(paths).status().installed:
         digest = shutil.which("digest") or str(Path("~/.local/bin/digest").expanduser())
-        subprocess.run([digest, "service", "install"], check=False)  # the new code restarts it
+        subprocess.run([digest, "service", "start"], check=False)  # the new code restarts it
     console.print(f"Updated to {version}.")
 
 

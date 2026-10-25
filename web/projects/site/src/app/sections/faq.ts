@@ -26,6 +26,10 @@ export const QUESTIONS: { q: string; a: string }[] = [
     a: "Not yet: the recorder needs macOS and the app is Android only.",
   },
   {
+    q: 'How do I pause WorkDigest?',
+    a: 'Run `digest service stop` in Terminal. It stays paused, even after a restart, until you run `digest service start`. Your data stays where it is.',
+  },
+  {
     q: 'How do I update or uninstall?',
     a: 'Your phone and Mac tell you when an update is out. On the Mac run `digest update`; to remove everything run `digest uninstall` (it asks before deleting your data).',
   },

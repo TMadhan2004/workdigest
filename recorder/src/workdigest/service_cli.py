@@ -16,7 +16,8 @@ from workdigest.paths import Paths
 from workdigest.service import LaunchAgent
 
 service_app = typer.Typer(
-    help="Start the daemon automatically at login (launchd).", no_args_is_help=True
+    help="Start, stop or check the background service (launchd: starts at login).",
+    no_args_is_help=True,
 )
 console = Console()
 
@@ -44,27 +45,46 @@ def daemon(
     runner.run_forever()
 
 
-@service_app.command()
-def install(
+def start(
     executable: Annotated[
         Path | None, typer.Option(help="The `digest` executable launchd should run.")
     ] = None,
 ) -> None:
-    """Install and start the launchd agent (per-user; `digest service uninstall` removes it)."""
+    """Start the background service now and at every login (restarts it if it is running)."""
     agent = LaunchAgent(Paths.resolve())
     try:
         plist = agent.install(executable or default_executable())
     except (FileNotFoundError, RuntimeError) as exc:
         console.print(f"[red]{escape(str(exc))}[/red]")
         raise typer.Exit(1) from exc
-    console.print(f"Installed {plist}; logs in {agent.paths.log_dir}")
+    console.print(f"Started (installed {plist}); logs in {agent.paths.log_dir}")
+
+
+def stop() -> None:
+    """Stop the background service; it stays stopped, also after a restart, until `digest service start`."""
+    removed = LaunchAgent(Paths.resolve()).uninstall()
+    console.print(
+        "Stopped (removed the launchd agent). Run `digest service start` to start it again."
+        if removed
+        else "The service was not running"
+    )
 
 
 @service_app.command()
-def uninstall() -> None:
-    """Stop the daemon and remove the launchd agent."""
-    removed = LaunchAgent(Paths.resolve()).uninstall()
-    console.print("Removed the launchd agent" if removed else "The launchd agent was not installed")
+def restart(
+    executable: Annotated[
+        Path | None, typer.Option(help="The `digest` executable launchd should run.")
+    ] = None,
+) -> None:
+    """Restart the background service (settings in config.toml apply without a restart)."""
+    start(executable)
+
+
+# start/stop are the names people use; install/uninstall stay as hidden aliases for scripts.
+service_app.command("start")(start)
+service_app.command("stop")(stop)
+service_app.command("install", hidden=True)(start)
+service_app.command("uninstall", hidden=True)(stop)
 
 
 @service_app.command()

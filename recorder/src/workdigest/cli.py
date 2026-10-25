@@ -397,7 +397,7 @@ def doctor(
         console.print(f"{label}: {'ok' if status.complete else 'not installed'}")
     service = LaunchAgent(paths).status()
     console.print(
-        f"Background daemon: {f'running (pid {service.pid})' if service.pid else '[yellow]not running[/yellow] (digest service install)'}"
+        f"Background daemon: {f'running (pid {service.pid})' if service.pid else '[yellow]not running[/yellow] (digest service start)'}"
     )
     if paths.db_path.exists():
         store = Store.open(paths.db_path)

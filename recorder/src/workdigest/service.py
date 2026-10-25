@@ -2,7 +2,7 @@
 
 The agent runs ``<venv>/bin/digest daemon`` with a PATH that includes Homebrew, ~/.local/bin
 (cursor-agent) and the system tools git needs. It is a *user* agent in
-``~/Library/LaunchAgents``: no root, no system-wide change, and ``digest service uninstall``
+``~/Library/LaunchAgents``: no root, no system-wide change, and ``digest service stop``
 removes it completely.
 """
 

@@ -155,11 +155,13 @@ def test_status(paths: Paths, executable: Path, tmp_path: Path) -> None:
 def test_service_commands(
     paths: Paths, executable: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """TC-SVC-005: `digest service install|status|uninstall` drive the agent and report plainly.
+    """TC-SVC-005: `digest service start|status|restart|stop` drive the agent and report plainly.
 
     Given: LaunchAgent redirected to a temp directory and a recording launchctl that reports a running pid.
-    When: install, status and uninstall run through the CLI; then install with a missing executable.
-    Then: exit codes 0/0/0 with readable output, and 1 with the error for the missing executable.
+    When: start, status, restart and stop run through the CLI; the old install/uninstall names too;
+          then start with a missing executable.
+    Then: exit codes 0 with readable output ("Started", "running (pid 4242)", "Stopped"), the old
+          names still work, and 1 with the error for the missing executable.
     """
     launchctl = Launchctl(print_out=PRINT_RUNNING.replace("(never exited)", "78"))
 
@@ -169,16 +171,23 @@ def test_service_commands(
         )
 
     monkeypatch.setattr(service_cli, "LaunchAgent", agent)
-    installed = runner.invoke(cli.app, ["service", "install", "--executable", str(executable)])
-    assert installed.exit_code == 0, installed.output
-    assert "Installed" in installed.output
+    started = runner.invoke(cli.app, ["service", "start", "--executable", str(executable)])
+    assert started.exit_code == 0, started.output
+    assert "Started" in started.output
     status = runner.invoke(cli.app, ["service", "status"])
     assert status.exit_code == 0
     assert "running (pid 4242)" in status.output
     assert "Last exit: 78" in status.output
-    removed = runner.invoke(cli.app, ["service", "uninstall"])
-    assert "Removed" in removed.output
-    missing = runner.invoke(cli.app, ["service", "install", "--executable", str(tmp_path / "nope")])
+    restarted = runner.invoke(cli.app, ["service", "restart", "--executable", str(executable)])
+    assert "Started" in restarted.output
+    stopped = runner.invoke(cli.app, ["service", "stop"])
+    assert "Stopped" in stopped.output
+    assert "digest service start" in stopped.output
+    assert "not running" in runner.invoke(cli.app, ["service", "stop"]).output
+    alias = runner.invoke(cli.app, ["service", "install", "--executable", str(executable)])
+    assert "Started" in alias.output
+    assert "Stopped" in runner.invoke(cli.app, ["service", "uninstall"]).output
+    missing = runner.invoke(cli.app, ["service", "start", "--executable", str(tmp_path / "nope")])
     assert missing.exit_code == 1
     assert service_cli.default_executable().name == "digest"
 
