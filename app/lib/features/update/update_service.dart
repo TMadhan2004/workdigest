@@ -126,10 +126,15 @@ final appVersionProvider = FutureProvider<AppVersion>((ref) async {
   return AppVersion(info.version, int.tryParse(info.buildNumber) ?? 0);
 });
 
-/// Null when the app was built without a website (no update checks).
+/// Whether this build may update itself: only release builds, which are signed with the
+/// release key. A debug or profile build is signed with another key, so Android would refuse
+/// the release APK ("package conflicts with an existing package").
+const bool updatesSupported = kReleaseMode;
+
+/// Null when the app was built without a website, or is not a release build (no update checks).
 final updateSourceProvider = Provider<UpdateSource?>((ref) {
   final site = ref.watch(appConfigProvider).siteUrl;
-  return site.isEmpty ? null : UpdateSource(site);
+  return site.isEmpty || !updatesSupported ? null : UpdateSource(site);
 });
 
 final updateInstallerProvider = Provider<UpdateInstaller>((ref) => otaInstall);

@@ -136,6 +136,17 @@ void main() {
       await events.close();
     });
 
+    test('TC-APP-146: only release builds look for updates', () {
+      // Given: a build with the website configured, running as a debug build (as tests do).
+      // When: the update source is read.
+      // Then: there is none, so a debug-signed install never offers the release-signed APK,
+      //       which Android would refuse as a conflicting package.
+      final container = ProviderContainer(overrides: [appConfigProvider.overrideWithValue(_config)]);
+      addTearDown(container.dispose);
+      expect(updatesSupported, isFalse);
+      expect(container.read(updateSourceProvider), isNull);
+    });
+
     testWidgets('TC-APP-145: an install below the minimum build must update first', (tester) async {
       // Given: build 8 installed; the release needs at least build 9.
       // When: the app opens.

@@ -16,7 +16,7 @@ Future<void> askNotificationPermission() async {
 
 /// Schedule the background check (kept across app restarts; replaced when the site changes).
 Future<void> scheduleUpdateChecks(String siteUrl) async {
-  if (siteUrl.isEmpty) return;
+  if (siteUrl.isEmpty || !updatesSupported) return;
   await Workmanager().initialize(updateCallbackDispatcher);
   await Workmanager().registerPeriodicTask(
     updateTask,
